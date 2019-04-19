@@ -14,6 +14,7 @@ from PyQt5.QtSql import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QComboBox, QStyleFactory, QListWidget, \
     QTableWidget, QTableWidgetItem, QListWidgetItem
+
 import sqlite3
 import csv
 import sys
@@ -75,6 +76,7 @@ class Ui_MainBD(object):
         self.bt_agregar_bd = QtWidgets.QPushButton(self.centralwidget)
         self.bt_agregar_bd.setGeometry(QtCore.QRect(550, 260, 170, 20))
         self.bt_agregar_bd.setObjectName("bt_agregar_bd")
+        self.bt_agregar_bd.clicked.connect(self.Anadir)
         # boton eliminar_bd
         self.bt_eliminar_bt = QtWidgets.QPushButton(self.centralwidget)
         self.bt_eliminar_bt.setGeometry(QtCore.QRect(550, 290, 170, 20))
@@ -119,7 +121,7 @@ class Ui_MainBD(object):
         QtCore.QMetaObject.connectSlotsByName(MainBD)
 
         #new table
-        self.get_products()
+        self.CargarTabla()
 
 
     def retranslateUi(self, MainBD):
@@ -150,32 +152,147 @@ class Ui_MainBD(object):
         self.actionManual_De_Uso.setText(_translate("MainBD", "Manual De Uso"))
 
     def AbrirArchivo(self):
-        global pathFileName
-        pathFileName, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Wybierz plik', '', 'csv(*.csv)')
-        print("pathFileName-`{}`, \n_-`{}`".format(pathFileName, _))
-        if pathFileName:
-            f = open(pathFileName, 'rb')
-
-            print(pathFileName)
+        #global pathFileName
+        dir = ""
+        dir, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Wybierz plik', '', 'csv(*.csv)')
+        #print("pathFileName-`{}`, \n_-`{}`".format(pathFileName, _))
+        if dir:
+            f = open(dir, 'rb')
+            #print(pathFileName)
+            return dir
             #self.dzielenieStron(f)
 
     def CargarCSV(self):
-        self.AbrirArchivo()
-        self.GuardarCSV()
+        dir = self.AbrirArchivo()
+        self.GuardarCSV(dir)
 
-    def GuardarCSV(self):
-        # Using try in case user types in unknown file or closes without choosing a file.
-        #nombre_tabla = self.name.get()
+    def CrearTabla(self,nombre_tabla):
+        query = '''CREATE TABLE IF NOT EXISTS ''' + nombre_tabla + '''
+                (user_id Text, 
+                status_id Text , 
+                created_at Datetime, 
+                screen_name Text,
+                text Text,
+                source Text,
+                display_text_width int, 
+                reply_to_status_id Text,
+                reply_to_user_id Text,
+                reply_to_screen_name Text, 
+                is_quote TEXT,
+                is_retweet Text,
+                favorite_count int, 
+                retweet_count int,
+                hashtags text,
+                symbols text, 
+                urls_url text,
+                urls_tco text,
+                urls_expanded_url text,
+                media_url text,
+                media_tco text,
+                media_expanded_url text,
+                media_type text,
+                ext_media_url text,
+                ext_media_tco text,
+                ext_media_expanded_url text,
+                ext_media_type text,
+                mentions_user_id text, 
+                mentions_screen_name text, 
+                lang text, 
+                quoted_status_id text,
+                quoted_text text, 
+                quoted_created_at text, 
+                quoted_source text,
+                quoted_favorite_count int,
+                quoted_retweet_count int, 
+                quoted_user_id text,
+                quoted_screen_name text,
+                quoted_name text,
+                quoted_followers_count int,
+                quoted_friends_count int, 
+                quoted_statuses_count int,
+                quoted_location text, 
+                quoted_description text,
+                quoted_verified text,
+                retweet_status_id text,
+                retweet_text text, 
+                retweet_created_at datetime, 
+                retweet_source text, 
+                retweet_favorite_count int,
+                retweet_retweet_count int,
+                retweet_user_id text, 
+                retweet_screen_name text, 
+                retweet_name text, 
+                retweet_followers_count int,
+                retweet_friends_count int ,
+                retweet_statuses_count int,
+                retweet_location text,
+                retweet_description text,
+                retweet_verified text,
+                place_url text,
+                place_name text,
+                place_full_name text, 
+                place_type text,
+                country text,
+                country_code text,
+                geo_coords text,
+                coords_coords text,
+                bbox_coords text,
+                status_url text,
+                name text, 
+                location text, 
+                description text, 
+                link text, 
+                protected text, 
+                followers_count int,
+                friends_count int,
+                listed_count int, 
+                statuses_count int, 
+                favourites_count int,
+                account_created_at datetime,
+                verified text,
+                profile_url text,
+                profile_expanded_url text,
+                account_lang text, 
+                profile_banner_url text,
+                profile_background_url text,
+                profile_image_url text)'''
+        db = self.run_query(query)
+
+    def Insertar(self,csv,tabla):
+        sql = sqlite3.connect(self.nombre_BD)
+        cur = sql.cursor()
+        for row in csv:
+            cur.execute(
+                "INSERT INTO " + tabla + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9],
+                 row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19],
+                 row[20], row[21], row[22], row[23], row[24], row[25], row[26], row[27], row[28], row[29],
+                 row[30], row[31], row[32], row[33], row[34], row[35], row[36], row[37], row[38], row[39],
+                 row[40], row[41], row[42], row[43], row[44], row[45], row[46], row[47], row[48], row[49],
+                 row[50], row[51], row[52], row[53], row[54], row[55], row[56], row[57], row[58], row[59],
+                 row[60], row[61], row[62], row[63], row[64], row[65], row[66], row[67], row[68], row[69],
+                 row[70], row[71], row[72], row[73], row[74], row[75], row[76], row[77], row[78], row[79],
+                 row[80], row[81], row[82], row[83], row[84], row[85], row[86], row[87]))
+        sql.commit()
+        sql.close()
+        self.limpiarBase(tabla)
+
+    def GuardarCSV(self,dir):
+
         nombre_tabla =   self.input_nombre_bd.text()
         #print(nombre_tabla)
         # poner un try/catch
-        #f = open(pathFileName, 'r', encoding='utf-8')
-        f=open(pathFileName,'r')
-        # f=open(name,'r')
+
+        f = open(dir, 'r',errors='ignore')
+
+        #f = open(dir, 'r', encoding='utf-8')
+
         # Omitimos la linea de encabezado
         next(f, None)
         reader = csv.reader(f, delimiter=',')
-        sql = sqlite3.connect(self.nombre_BD)
+        self.CrearTabla(nombre_tabla)
+        self.Insertar(reader,nombre_tabla)
+        """sql = sqlite3.connect(self.nombre_BD)
         cur = sql.cursor()
 
         cur.execute('''CREATE TABLE IF NOT EXISTS ''' + nombre_tabla + '''
@@ -266,8 +383,8 @@ class Ui_MainBD(object):
                 account_lang text, 
                 profile_banner_url text,
                 profile_background_url text,
-                profile_image_url text)''')
-
+                profile_image_url text)''')"""
+        """
         for row in reader:
             cur.execute(
                 "INSERT INTO " + nombre_tabla + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -282,14 +399,15 @@ class Ui_MainBD(object):
                  row[80], row[81], row[82], row[83], row[84], row[85], row[86], row[87]))
 
         # cur.execute("delete from " + nombre_tabla +" where rowid not in (select  min(rowid) from "+ nombre_tabla + " group by status_id)")
-
+"""
         # self.limpiarBase()
         f.close()
-        sql.commit()
-        sql.close()
-        self.limpiarBase(nombre_tabla)
-        self.get_products()
-        self.ContadorFilas()
+        #sql.commit()
+        #sql.close()
+        #self.limpiarBase(nombre_tabla)
+        self.CargarTabla()
+        #self.ContadorFilas()
+
 
     def run_query(self, query, parameters=()):
         with sqlite3.connect(self.nombre_BD) as conn:
@@ -299,47 +417,49 @@ class Ui_MainBD(object):
         return result
 
     def limpiarBase(self,tabla):
+        query = "delete from " + tabla + " where rowid not in (select  min(rowid) from " + tabla + " group by status_id)"
+        db = self.run_query(query)
         sql = sqlite3.connect(self.nombre_BD)
-        cur = sql.cursor()
+        #cur = sql.cursor()
         #print(tabla)
-        cur.execute(
+        """cur.execute(
             "delete from " + tabla + " where rowid not in (select  min(rowid) from " + tabla + " group by status_id)")
         sql.commit()
-        sql.close()
+        sql.close()"""
 
-    def get_products(self):
+    def CargarTabla(self):
         index = 0
         query = 'SELECT tbl_name FROM sqlite_master WHERE type = "table"'
         db_rows = self.run_query(query)
         for row in db_rows:
             #print(row)
             self.tabla.setRowCount(index + 1)
-            query = 'SELECT min(created_at) from ' + row[0]
+            query = 'SELECT min(created_at),max(created_at) from ' + row[0]
             db_rows2 = self.run_query(query)
             for row2 in db_rows2:
-                query = 'SELECT max(created_at) from ' + row[0]
-                db_rows3 = self.run_query(query)
-                for row3 in db_rows3:
-                    self.tabla.setItem(index, 0, QTableWidgetItem(row[0]))
-                    self.tabla.setItem(index, 1, QTableWidgetItem(row2[0]))
-                    self.tabla.setItem(index, 2, QTableWidgetItem(row3[0]))
-                    index += 1
+                self.tabla.setItem(index, 0, QTableWidgetItem(row[0]))
+                self.tabla.setItem(index, 1, QTableWidgetItem(row2[0]))
+                self.tabla.setItem(index, 2, QTableWidgetItem(row2[1]))
+                index += 1
 
     def BorrarTabla(self):
-        sql = sqlite3.connect(self.nombre_BD)
-        cur = sql.cursor()
+        #sql = sqlite3.connect(self.nombre_BD)
+        #cur = sql.cursor()
         selected = self.tabla.currentIndex()
         nombre = self.tabla.selectedItems()[0].text()
-        print(nombre)
+        query = "DROP TABLE " + nombre
+        db = self.run_query(query)
+        query = "vacuum"
+        db = self.run_query(query)
+        self.tabla.removeRow(selected.row())
+        """print(nombre)
         cur.execute("DROP TABLE " + nombre)
         cur.execute("vacuum")
         self.tabla.removeRow(selected.row())
         sql.commit()
-        sql.close()
+        sql.close()"""
 
-    def ContadorFilas(self):
-        count = self.tabla.rowCount()
-        print(count)
+
     def ExportarBase(self):
         base = self.tabla.selectedItems()[0].text()
         sql = sqlite3.connect(self.nombre_BD)
@@ -352,8 +472,19 @@ class Ui_MainBD(object):
         sql.close()
 
     def Anadir(self):
+        dir = self.AbrirArchivo()
         base = self.tabla.selectedItems()[0].text()
-        name = askopenfilename(initialdir="C:/",
+
+        f = open(dir, 'r', errors='ignore')
+
+        # Omitimos la linea de encabezado
+        next(f, None)
+        reader = csv.reader(f, delimiter=',')
+        print(base)
+        print(dir)
+        self.Insertar(reader, base)
+        #self.Insertar(csv, base):
+        """name = askopenfilename(initialdir="C:/",
                                filetypes=(("Text File", ".csv"), ("All Files", ".*")),
                                title="Choose a file."
                                )
@@ -378,7 +509,7 @@ class Ui_MainBD(object):
         f.close()
         sql.commit()
         self.get_products()
-        sql.close()
+        sql.close()"""
 
 
 

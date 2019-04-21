@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QMainWindow, QAction, qApp, QApplication
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pprint import pprint
 from BD import Ui_MainBD
-from Muestra import Ui_MainBD
+from Muestra import Ui_MainMUESTRA
 import logo_rc
 import sys
 
@@ -20,7 +20,6 @@ class INDEX(object):
         EXADATA.setObjectName("EXADATA")
         #TAMAÑO DE VENTANA
         EXADATA.resize(800, 600)
-
 
         #LOGO
         self.centralwidget = QtWidgets.QWidget(EXADATA)
@@ -44,9 +43,9 @@ class INDEX(object):
             #BOTON PROGRAMAS
         self.Programas = QtWidgets.QMenu(self.menubar)
         self.BaseDeDatos = QtWidgets.QAction(EXADATA)
-        self.Muestra = QtWidgets.QAction(EXADATA)
+        self.OTRO_PROGRAMA = QtWidgets.QAction(EXADATA)
         self.Programas.addAction(self.BaseDeDatos)
-        self.Programas.addAction(self.Muestra)
+        self.Programas.addAction(self.OTRO_PROGRAMA)
 
             #BOTON AYUDA
         self.Ayuda = QtWidgets.QMenu(self.menubar)
@@ -72,14 +71,14 @@ class INDEX(object):
 
         self.Programas.setTitle(_translate("EXADATA", "Programas"))
         self.BaseDeDatos.setText(_translate("EXADATA", "BASE DE DATOS"))
-        self.Muestra.setText(_translate("EXADATA", "MUESTRA"))
+        self.OTRO_PROGRAMA.setText(_translate("EXADATA", "OTRO PROGRAMA"))
 
         self.Ayuda.setTitle(_translate("EXADATA", "Ayuda"))
         self.Sobre_que.setText(_translate("EXADATA", "Sobre que"))
 
         #Funciones de menu
-        self.BaseDeDatos.triggered.connect(self.Abrir_BD)
-        self.Muestra.triggered.connect(self.Abrir_Muestra)
+        self.BaseDeDatos.triggered.connect(self.BASE)
+        self.OTRO_PROGRAMA.triggered.connect(self.MUESTRA)
 
     def CUADROTEXTO(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -100,15 +99,15 @@ class INDEX(object):
                                                 #TEXTO PARRAFO 2
                                             ">$$$$$$$$</span></p></body></html>"))
 
-    def Abrir_BD(self):
+    def BASE(self):
         self.ventana=QtWidgets.QMainWindow()
         self.ui=Ui_MainBD()
         self.ui.setupUi(self.ventana)
         self.ventana.show()
 
-    def Abrir_Muestra(self):
+    def MUESTRA(self):
         self.ventana=QtWidgets.QMainWindow()
-        self.ui=Ui_MainBD()
+        self.ui=Ui_MainMUESTRA()
         self.ui.setupUi(self.ventana)
         self.ventana.show()
 

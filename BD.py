@@ -14,6 +14,7 @@ from PyQt5.QtSql import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QComboBox, QStyleFactory, QListWidget, \
     QTableWidget, QTableWidgetItem, QListWidgetItem
+#from Index import INDEX
 
 import sqlite3
 import csv
@@ -147,6 +148,7 @@ class Ui_MainBD(object):
         self.menuProgramas.setTitle(_translate("MainBD", "Programas"))
         self.menuAyuda.setTitle(_translate("MainBD", "Ayuda"))
         self.actionIndex.setText(_translate("MainBD", "Index"))
+        #self.actionIndex.triggered.connect(self.Index)
         self.actionSalir.setText(_translate("MainBD", "Salir"))
         self.actionSobre.setText(_translate("MainBD", "Sobre"))
         self.actionManual_De_Uso.setText(_translate("MainBD", "Manual De Uso"))
@@ -511,6 +513,13 @@ class Ui_MainBD(object):
         self.get_products()
         sql.close()"""
 
+    '''
+    def Index(self):
+        self.ventana=QtWidgets.QMainWindow()
+        self.ui=INDEX()
+        self.ui.setupUi(self.ventana)
+        self.ventana.show()
+    '''
 
 
 

@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QCo
 import sqlite3
 import csv
 import sys
+import datetime
 
 class Ui_MainMUESTRA(object):
     pathFileName = ""
@@ -49,6 +50,7 @@ class Ui_MainMUESTRA(object):
         self.tabla.horizontalHeader().setDefaultSectionSize(120)
         self.tabla.horizontalHeader().setStretchLastSection(True)
         self.tabla.verticalHeader().setStretchLastSection(False)
+        self.tabla.cellClicked.connect(self.ConsultarFecha)
         #fin tabla
 
         # BOTONES
@@ -56,13 +58,18 @@ class Ui_MainMUESTRA(object):
         self.bt_exportar_bd = QtWidgets.QPushButton(self.centralwidget)
         self.bt_exportar_bd.setGeometry(QtCore.QRect(550, 300, 100, 20))
         self.bt_exportar_bd.setObjectName("bt_exportar_bd")
-        self.bt_exportar_bd.clicked.connect(self.ExportarBase)
+        self.bt_exportar_bd.clicked.connect(self.Exportar_Fecha)
 
         # boton exportar_bd2
         self.bt_exportar_bd2 = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_exportar_bd2.setGeometry(QtCore.QRect(550, 370, 100, 20))
+        self.bt_exportar_bd2.setGeometry(QtCore.QRect(635, 370, 100, 20))
         self.bt_exportar_bd2.setObjectName("bt_exportar_bd2")
-        self.bt_exportar_bd2.clicked.connect(self.ExportarBase)
+        self.bt_exportar_bd2.clicked.connect(self.Exportar_Cantidad)
+
+        # CUADRO TEXTO
+        self.muestra_cantidad = QtWidgets.QLineEdit(self.centralwidget)
+        self.muestra_cantidad.setGeometry(QtCore.QRect(550, 370, 50, 20))
+        self.muestra_cantidad.setObjectName("muestra_cantidad")
 
         #=================================================================================
         MainBD.setCentralWidget(self.centralwidget)
@@ -106,15 +113,19 @@ class Ui_MainMUESTRA(object):
 
         #LABEL MUESTRA DE TODA LA BASE
         self.label_muestraToda = QtWidgets.QLabel(self.centralwidget)
-        self.label_muestraToda.setGeometry(QtCore.QRect(550, 350, 150, 16))
+        self.label_muestraToda.setGeometry(QtCore.QRect(550, 350, 200, 16))
         self.label_muestraToda.setObjectName("label_muestraToda")
 
         self.fechaInicio = QtWidgets.QDateEdit(self.centralwidget)
         self.fechaInicio.setGeometry(QtCore.QRect(550, 270, 110, 22))
         self.fechaInicio.setObjectName("fechaInicio")
+        self.fechaInicio.setCalendarPopup(True)
         self.fechaTermino = QtWidgets.QDateEdit(self.centralwidget)
         self.fechaTermino.setGeometry(QtCore.QRect(720, 270, 110, 22))
         self.fechaTermino.setObjectName("fechaTermino")
+        self.fechaTermino.setCalendarPopup(True)
+        self.fechaInicio.setDate(QtCore.QDate.currentDate())
+        self.fechaTermino.setDate(QtCore.QDate.currentDate())
 
         self.incioLetra = QtWidgets.QLabel(self.centralwidget)
         self.incioLetra.setGeometry(QtCore.QRect(550, 250, 111, 16))
@@ -122,6 +133,8 @@ class Ui_MainMUESTRA(object):
         self.terminoLetra = QtWidgets.QLabel(self.centralwidget)
         self.terminoLetra.setGeometry(QtCore.QRect(720, 250, 111, 16))
         self.terminoLetra.setObjectName("terminoLetra")
+
+
 
 
         self.retranslateUi(MainBD)
@@ -133,7 +146,7 @@ class Ui_MainMUESTRA(object):
 
     def retranslateUi(self, MainBD):
         _translate = QtCore.QCoreApplication.translate
-        MainBD.setWindowTitle(_translate("MainBD", "Base De Datos"))
+        MainBD.setWindowTitle(_translate("MainBD", "Muestra"))
         #inicio tabla
         item = self.tabla.horizontalHeaderItem(0)
         item.setText(_translate("MainBD", "NOMBRE"))
@@ -149,7 +162,7 @@ class Ui_MainMUESTRA(object):
 
         #LABEL
         self.label_muestraFecha.setText(_translate("MainBD", "MUESTRA POR FECHA"))
-        self.label_muestraToda.setText(_translate("MainBD", "MUESTRA DE TODA LA BASE"))
+        self.label_muestraToda.setText(_translate("MainBD", "MUESTRA POR CANTIDAD DE TWEETS"))
 
         self.incioLetra = QtWidgets.QLabel(self.centralwidget)
         self.incioLetra.setGeometry(QtCore.QRect(440, 230, 111, 16))
@@ -176,6 +189,7 @@ class Ui_MainMUESTRA(object):
             conn.commit()
         return result
 
+
     def CargarTabla(self):
         index = 0
         query = 'SELECT tbl_name FROM sqlite_master WHERE type = "table"'
@@ -184,7 +198,7 @@ class Ui_MainMUESTRA(object):
             #print(row)
             self.tabla.setRowCount(index + 1)
             #query = 'SELECT min(created_at),max(created_at) from ' + row[0]
-            query = 'SELECT min(created_at),max(created_at),count(*) from ' + row[0]
+            query = "SELECT strftime('%d-%m-%Y',min(created_at)),strftime('%d-%m-%Y',max(created_at)),count(*) from " + row[0]
             db_rows2 = self.run_query(query)
             for row2 in db_rows2:
                 self.tabla.setItem(index, 0, QTableWidgetItem(row[0]))
@@ -193,31 +207,52 @@ class Ui_MainMUESTRA(object):
                 self.tabla.setItem(index, 3, QTableWidgetItem(str(row2[2])))
                 index += 1
 
-    def ExportarBase(self):
+    def ConsultarFecha(self):
+        #tabla = self.tabla.selectedItems()[0].text()
+        #tabla = self.tabla.selectedItems()[3].text()
+        a = self.tabla.currentRow()
+        self.tabla.selectRow(a)
+        #b = self.tabla.currentColumn()
+        f_desde = self.tabla.item(a,1).text()
+
+        f_hasta = self.tabla.item(a,2).text()
+        year = f_desde[6:10]
+        day = f_desde[0:2]
+        month = f_desde[3:5]
+        #print(month)
+        self.fechaInicio.setDate(QtCore.QDate(int(year),int(month),int(day)))
+
+        year = f_hasta[6:10]
+        day = f_hasta[0:2]
+        month = f_hasta[3:5]
+        # print(month)
+        self.fechaTermino.setDate(QtCore.QDate(int(year), int(month), int(day)))
+
+
+    def Exportar_Fecha(self):
         base = self.tabla.selectedItems()[0].text()
+        fecha_inicio = self.fechaInicio.date().toString("yyyy-MM-dd")
+        fecha_termino = self.fechaTermino.date().toString("yyyy-MM-dd")
         sql = sqlite3.connect(self.nombre_BD)
         cur = sql.cursor()
-        cur.execute("select * from " + base)
-        with open(base + ".csv", "w", newline='', encoding='utf-8') as csv_file:
+        cur.execute("select * from "+base+" where created_at BETWEEN ('"+fecha_inicio+" 00:00:00') and ('"+fecha_termino+" 23:59:59') order by created_at asc")
+        with open(base+"_MUESTRA" + ".csv", "w", newline='', encoding='utf-8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
             csv_writer.writerows(cur.fetchall())
         sql.close()
 
-
-    def muestra(self):
-        fecha_inicio = self.fechaInicio.date().toString("yyyy-MM-dd")
-        fecha_termino = self.fechaTermino.date().toString("yyyy-MM-dd")
+    def Exportar_Cantidad(self):
+        base = self.tabla.selectedItems()[0].text()
+        cantidad_tweets = self.muestra_cantidad.text()
         sql = sqlite3.connect(self.nombre_BD)
         cur = sql.cursor()
-
-
-
+        cur.execute("SELECT * FROM "+base+" LIMIT("+cantidad_tweets+")")
+        with open(base+"_MUESTRA_CANTIDAD" + ".csv", "w", newline='', encoding='utf-8') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            csv_writer.writerow([i[0] for i in cur.description])
+            csv_writer.writerows(cur.fetchall())
         sql.close()
-
-
-
-
 
 
 if __name__ == "__main__":

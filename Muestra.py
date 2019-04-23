@@ -235,7 +235,8 @@ class Ui_MainMUESTRA(object):
         fecha_termino = self.fechaTermino.date().toString("yyyy-MM-dd")
         sql = sqlite3.connect(self.nombre_BD)
         cur = sql.cursor()
-        cur.execute("select * from "+base+" where created_at BETWEEN ('"+fecha_inicio+" 00:00:00') and ('"+fecha_termino+" 23:59:59') order by created_at asc")
+
+        cur.execute("select * from "+base+" where created_at BETWEEN ('"+fecha_inicio+" 00:00:00') and ('"+fecha_termino+" 23:59:59') order by created_at asc, RANDOM() LIMIT 1000")
         with open(base+"_MUESTRA" + ".csv", "w", newline='', encoding='utf-8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
@@ -247,7 +248,7 @@ class Ui_MainMUESTRA(object):
         cantidad_tweets = self.muestra_cantidad.text()
         sql = sqlite3.connect(self.nombre_BD)
         cur = sql.cursor()
-        cur.execute("SELECT * FROM "+base+" LIMIT("+cantidad_tweets+")")
+        cur.execute("SELECT * FROM "+base+" RANDOM() LIMIT("+cantidad_tweets+")")
         with open(base+"_MUESTRA_CANTIDAD" + ".csv", "w", newline='', encoding='utf-8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])

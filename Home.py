@@ -11,6 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pprint import pprint
 from BD import Ui_MainBD
 from Muestra import Ui_MainMUESTRA
+from Cortarfecha import Ui_MainCortar
 import logo_rc
 import sys
 
@@ -43,9 +44,11 @@ class INDEX(object):
             #BOTON PROGRAMAS
         self.Programas = QtWidgets.QMenu(self.menubar)
         self.BaseDeDatos = QtWidgets.QAction(EXADATA)
-        self.OTRO_PROGRAMA = QtWidgets.QAction(EXADATA)
+        self.Muestra_Programa = QtWidgets.QAction(EXADATA)
+        self.Cortar_Fecha = QtWidgets.QAction(EXADATA)
         self.Programas.addAction(self.BaseDeDatos)
-        self.Programas.addAction(self.OTRO_PROGRAMA)
+        self.Programas.addAction(self.Muestra_Programa)
+        self.Programas.addAction(self.Cortar_Fecha)
 
             #BOTON AYUDA
         self.Ayuda = QtWidgets.QMenu(self.menubar)
@@ -59,7 +62,7 @@ class INDEX(object):
         EXADATA.setStatusBar(self.statusbar)
         self.menubar.addAction(self.Programas.menuAction())
         self.menubar.addAction(self.Ayuda.menuAction())
-
+        #self.menubar.addAction(self.Ayuda.)
         #FUNCIONES
         self.BARRAMENU(EXADATA)
         self.CUADROTEXTO(EXADATA)
@@ -70,15 +73,17 @@ class INDEX(object):
         EXADATA.setWindowTitle(_translate("EXADATA", "MainWindow"))
 
         self.Programas.setTitle(_translate("EXADATA", "Programas"))
-        self.BaseDeDatos.setText(_translate("EXADATA", "BASE DE DATOS"))
-        self.OTRO_PROGRAMA.setText(_translate("EXADATA", "OTRO PROGRAMA"))
+        self.BaseDeDatos.setText(_translate("EXADATA", "Base de dato"))
+        self.Muestra_Programa.setText(_translate("EXADATA", "Muestra"))
+        self.Cortar_Fecha.setText(_translate("EXADATA", "Cortar fecha"))
 
         self.Ayuda.setTitle(_translate("EXADATA", "Ayuda"))
         self.Sobre_que.setText(_translate("EXADATA", "Sobre que"))
 
         #Funciones de menu
         self.BaseDeDatos.triggered.connect(self.BASE)
-        self.OTRO_PROGRAMA.triggered.connect(self.MUESTRA)
+        self.Muestra_Programa.triggered.connect(self.MUESTRA)
+        self.Cortar_Fecha.triggered.connect(self.CORTAR)
 
     def CUADROTEXTO(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -110,6 +115,13 @@ class INDEX(object):
         self.ui=Ui_MainMUESTRA()
         self.ui.setupUi(self.ventana)
         self.ventana.show()
+
+    def CORTAR(self):
+        self.ventana=QtWidgets.QMainWindow()
+        self.ui=Ui_MainCortar()
+        self.ui.setupUi(self.ventana)
+        self.ventana.show()
+
 
 
 if __name__ == "__main__":

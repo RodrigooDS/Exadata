@@ -33,7 +33,7 @@ class Ui_MainMUESTRA(object):
         #inicio tabla
         self.tabla = QtWidgets.QTableWidget(self.centralwidget)
         # formato tabla posx,posy,tamx,tamy
-        self.tabla.setGeometry(QtCore.QRect(10, 10, 510, 400))
+        self.tabla.setGeometry(QtCore.QRect(10, 40, 510, 400))
         self.tabla.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.tabla.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.tabla.setColumnCount(4)
@@ -56,84 +56,74 @@ class Ui_MainMUESTRA(object):
         # BOTONES
         # boton exportar_bd
         self.bt_exportar_bd = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_exportar_bd.setGeometry(QtCore.QRect(550, 300, 100, 20))
+        self.bt_exportar_bd.setGeometry(QtCore.QRect(550, 320, 100, 20))
         self.bt_exportar_bd.setObjectName("bt_exportar_bd")
         self.bt_exportar_bd.clicked.connect(self.Exportar_Fecha)
 
         # boton exportar_bd2
         self.bt_exportar_bd2 = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_exportar_bd2.setGeometry(QtCore.QRect(635, 370, 100, 20))
+        self.bt_exportar_bd2.setGeometry(QtCore.QRect(635, 380, 100, 20))
         self.bt_exportar_bd2.setObjectName("bt_exportar_bd2")
         self.bt_exportar_bd2.clicked.connect(self.Exportar_Cantidad)
 
         # CUADRO TEXTO
         self.muestra_cantidad = QtWidgets.QLineEdit(self.centralwidget)
-        self.muestra_cantidad.setGeometry(QtCore.QRect(550, 370, 50, 20))
+        self.muestra_cantidad.setGeometry(QtCore.QRect(550, 380, 50, 20))
         self.muestra_cantidad.setObjectName("muestra_cantidad")
 
         #=================================================================================
         MainBD.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainBD)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
-        self.menubar.setObjectName("menubar")
-        self.menuProgramas = QtWidgets.QMenu(self.menubar)
-        self.menuProgramas.setObjectName("menuProgramas")
-        self.menuAyuda = QtWidgets.QMenu(self.menubar)
-        self.menuAyuda.setObjectName("menuAyuda")
-        MainBD.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainBD)
-        self.statusbar.setObjectName("statusbar")
-        MainBD.setStatusBar(self.statusbar)
-        self.actionIndex = QtWidgets.QAction(MainBD)
-        self.actionIndex.setObjectName("actionIndex")
-        self.actionSalir = QtWidgets.QAction(MainBD)
-        self.actionSalir.setObjectName("actionSalir")
-        self.actionSobre = QtWidgets.QAction(MainBD)
-        self.actionSobre.setObjectName("actionSobre")
-        self.actionManual_De_Uso = QtWidgets.QAction(MainBD)
-        self.actionManual_De_Uso.setObjectName("actionManual_De_Uso")
-        self.menuProgramas.addAction(self.actionIndex)
-        self.menuProgramas.addAction(self.actionSalir)
-        self.menuAyuda.addAction(self.actionSobre)
-        self.menuAyuda.addAction(self.actionManual_De_Uso)
-        self.menubar.addAction(self.menuProgramas.menuAction())
-        self.menubar.addAction(self.menuAyuda.menuAction())
+
         #CALENDARIO
         # formato tabla posx,posy,tamx,tamy
         self.calendario = QtWidgets.QCalendarWidget(self.centralwidget)
-        self.calendario.setGeometry(QtCore.QRect(550, 30, 312, 183))
+        self.calendario.setGeometry(QtCore.QRect(550, 40, 312, 183))
         self.calendario.setStyleSheet("")
         self.calendario.setStyleSheet("alternate-background-color: rgb(118, 148, 255);")
         self.calendario.setObjectName("calendario")
 
         #LABEL MUESTRA POR FECHA
         self.label_muestraFecha = QtWidgets.QLabel(self.centralwidget)
-        self.label_muestraFecha.setGeometry(QtCore.QRect(550, 230, 121, 16))
+        self.label_muestraFecha.setGeometry(QtCore.QRect(550, 250, 121, 16))
         self.label_muestraFecha.setObjectName("label_muestraFecha")
 
         #LABEL MUESTRA DE TODA LA BASE
         self.label_muestraToda = QtWidgets.QLabel(self.centralwidget)
-        self.label_muestraToda.setGeometry(QtCore.QRect(550, 350, 200, 16))
+        self.label_muestraToda.setGeometry(QtCore.QRect(550, 360, 200, 16))
         self.label_muestraToda.setObjectName("label_muestraToda")
 
         self.fechaInicio = QtWidgets.QDateEdit(self.centralwidget)
-        self.fechaInicio.setGeometry(QtCore.QRect(550, 270, 110, 22))
+        self.fechaInicio.setGeometry(QtCore.QRect(550, 290, 110, 22))
         self.fechaInicio.setObjectName("fechaInicio")
         self.fechaInicio.setCalendarPopup(True)
         self.fechaTermino = QtWidgets.QDateEdit(self.centralwidget)
-        self.fechaTermino.setGeometry(QtCore.QRect(720, 270, 110, 22))
+        self.fechaTermino.setGeometry(QtCore.QRect(720, 290, 110, 22))
         self.fechaTermino.setObjectName("fechaTermino")
         self.fechaTermino.setCalendarPopup(True)
         self.fechaInicio.setDate(QtCore.QDate.currentDate())
         self.fechaTermino.setDate(QtCore.QDate.currentDate())
 
         self.incioLetra = QtWidgets.QLabel(self.centralwidget)
-        self.incioLetra.setGeometry(QtCore.QRect(550, 250, 111, 16))
+        self.incioLetra.setGeometry(QtCore.QRect(550, 270, 111, 16))
         self.incioLetra.setObjectName("incioLetra")
         self.terminoLetra = QtWidgets.QLabel(self.centralwidget)
-        self.terminoLetra.setGeometry(QtCore.QRect(720, 250, 111, 16))
+        self.terminoLetra.setGeometry(QtCore.QRect(720, 270, 111, 16))
         self.terminoLetra.setObjectName("terminoLetra")
 
+        #BARRA MENU
+        self.menubar = QtWidgets.QMenuBar(MainBD)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setObjectName("menubar")
+
+        self.Programas = QtWidgets.QMenu(self.menubar)
+        self.BaseDeDatos = QtWidgets.QAction(MainBD)
+        self.menubar.addAction(self.Programas.menuAction())
+        self.Programas.addAction(self.BaseDeDatos)
+
+        self.Ayuda = QtWidgets.QMenu(self.menubar)
+        self.SobreQue = QtWidgets.QAction(MainBD)
+        self.menubar.addAction(self.Ayuda.menuAction())
+        self.Ayuda.addAction(self.SobreQue)
 
 
 
@@ -163,23 +153,19 @@ class Ui_MainMUESTRA(object):
         #LABEL
         self.label_muestraFecha.setText(_translate("MainBD", "MUESTRA POR FECHA"))
         self.label_muestraToda.setText(_translate("MainBD", "MUESTRA POR CANTIDAD DE TWEETS"))
-
-        self.incioLetra = QtWidgets.QLabel(self.centralwidget)
-        self.incioLetra.setGeometry(QtCore.QRect(440, 230, 111, 16))
-        self.incioLetra.setObjectName("incioLetra")
-        self.terminoLetra = QtWidgets.QLabel(self.centralwidget)
-        self.terminoLetra.setGeometry(QtCore.QRect(620, 230, 111, 16))
-        self.terminoLetra.setObjectName("terminoLetra")
-
-
         self.bt_exportar_bd.setText(_translate("MainBD", "EXPORTAR"))
         self.bt_exportar_bd2.setText(_translate("MainBD", "EXPORTAR"))
-        self.menuProgramas.setTitle(_translate("MainBD", "Programas"))
-        self.menuAyuda.setTitle(_translate("MainBD", "Ayuda"))
-        self.actionIndex.setText(_translate("MainBD", "Index"))
-        self.actionSalir.setText(_translate("MainBD", "Salir"))
-        self.actionSobre.setText(_translate("MainBD", "Sobre"))
-        self.actionManual_De_Uso.setText(_translate("MainBD", "Manual De Uso"))
+
+        #BARRA MENU
+        self.Programas.setTitle(_translate("MainBD", "Programas"))
+        self.BaseDeDatos.setText(_translate("MainBD", "Salir"))
+        self.BaseDeDatos.triggered.connect(exit)
+
+        self.Ayuda.setTitle(_translate("MainBD", "Ayuda"))
+        self.SobreQue.setText(_translate("MainBD", "Sobre Que"))
+        # self.SobreQue.triggered.connect(exit)
+
+
 
 
     def run_query(self, query, parameters=()):
@@ -241,6 +227,7 @@ class Ui_MainMUESTRA(object):
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
             csv_writer.writerows(cur.fetchall())
+        QMessageBox.warning(self.centralwidget, "EXPORTACION MUESTRA LISTA", "EXPORTACION DE MUESTRA TERMINADA.")
         sql.close()
 
     def Exportar_Cantidad(self):
@@ -248,12 +235,24 @@ class Ui_MainMUESTRA(object):
         cantidad_tweets = self.muestra_cantidad.text()
         sql = sqlite3.connect(self.nombre_BD)
         cur = sql.cursor()
-        cur.execute("SELECT * FROM "+base+" RANDOM() LIMIT("+cantidad_tweets+")")
-        with open(base+"_MUESTRA_CANTIDAD" + ".csv", "w", newline='', encoding='utf-8') as csv_file:
+        cur.execute("SELECT * FROM "+base+" RANDOM LIMIT("+cantidad_tweets+")")
+        with open(base+"_MUESTRA_CANTIDAD" + ".csv", "w", newline='', errors='ignore') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
             csv_writer.writerows(cur.fetchall())
+        QMessageBox.warning(self.centralwidget, "EXPORTACION MUESTRA LISTA", "EXPORTACION DE MUESTRA TERMINADA.")
         sql.close()
+
+    def closeEvent(self, event):
+        close = QMessageBox.question(self,
+                                     "Salir",
+                                     "Estas seguro que quieres salir?",
+                                     QMessageBox.Yes | QMessageBox.No)
+        if close == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
 
 
 if __name__ == "__main__":

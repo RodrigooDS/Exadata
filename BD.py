@@ -5,7 +5,6 @@
 # Created by: PyQt5 UI code generator 5.11.3
 #
 # WARNING! All changes made in this file will be lost!
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, QMessageBox, QHBoxLayout, QLineEdit, QLabel, QGridLayout
@@ -14,6 +13,7 @@ from PyQt5.QtSql import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QComboBox, QStyleFactory, QListWidget, \
     QTableWidget, QTableWidgetItem, QListWidgetItem
+import os
 #from Index import INDEX
 
 import sqlite3
@@ -91,32 +91,21 @@ class Ui_MainBD(object):
 
         #=================================================================================
         MainBD.setCentralWidget(self.centralwidget)
+
+        # BARRA MENU
         self.menubar = QtWidgets.QMenuBar(MainBD)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
         self.menubar.setObjectName("menubar")
-        self.menuProgramas = QtWidgets.QMenu(self.menubar)
-        self.menuProgramas.setObjectName("menuProgramas")
-        self.menuAyuda = QtWidgets.QMenu(self.menubar)
-        self.menuAyuda.setObjectName("menuAyuda")
-        MainBD.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainBD)
-        self.statusbar.setObjectName("statusbar")
-        MainBD.setStatusBar(self.statusbar)
-        self.actionIndex = QtWidgets.QAction(MainBD)
-        self.actionIndex.setObjectName("actionIndex")
-        self.actionSalir = QtWidgets.QAction(MainBD)
-        self.actionSalir.setObjectName("actionSalir")
-        self.actionSobre = QtWidgets.QAction(MainBD)
-        self.actionSobre.setObjectName("actionSobre")
-        self.actionManual_De_Uso = QtWidgets.QAction(MainBD)
-        self.actionManual_De_Uso.setObjectName("actionManual_De_Uso")
-        self.menuProgramas.addAction(self.actionIndex)
-        self.menuProgramas.addAction(self.actionSalir)
-        self.menuAyuda.addAction(self.actionSobre)
-        self.menuAyuda.addAction(self.actionManual_De_Uso)
-        self.menubar.addAction(self.menuProgramas.menuAction())
-        self.menubar.addAction(self.menuAyuda.menuAction())
 
+        self.Programas = QtWidgets.QMenu(self.menubar)
+        self.BaseDeDatos = QtWidgets.QAction(MainBD)
+        self.menubar.addAction(self.Programas.menuAction())
+        self.Programas.addAction(self.BaseDeDatos)
+
+        self.Ayuda = QtWidgets.QMenu(self.menubar)
+        self.SobreQue = QtWidgets.QAction(MainBD)
+        self.menubar.addAction(self.Ayuda.menuAction())
+        self.Ayuda.addAction(self.SobreQue)
 
         self.retranslateUi(MainBD)
         QtCore.QMetaObject.connectSlotsByName(MainBD)
@@ -128,6 +117,18 @@ class Ui_MainBD(object):
     def retranslateUi(self, MainBD):
         _translate = QtCore.QCoreApplication.translate
         MainBD.setWindowTitle(_translate("MainBD", "Base De Datos"))
+
+        # BARRA MENU
+        self.Programas.setTitle(_translate("MainBD", "Programas"))
+        self.BaseDeDatos.setText(_translate("MainBD", "Salir"))
+        self.BaseDeDatos.triggered.connect(exit)
+
+        self.Ayuda.setTitle(_translate("MainBD", "Ayuda"))
+        self.SobreQue.setText(_translate("MainBD", "Sobre Que"))
+        #self.SobreQue.triggered.connect(exit)
+
+
+
         #inicio tabla
         item = self.tabla.horizontalHeaderItem(0)
         item.setText(_translate("MainBD", "NOMBRE"))
@@ -145,13 +146,9 @@ class Ui_MainBD(object):
         self.bt_agregar_bd.setText(_translate("MainBD", "AGREGAR BASE"))
         self.bt_eliminar_bt.setText(_translate("MainBD", "ELIMINAR BASE"))
         self.bt_exportar_bd.setText(_translate("MainBD", "EXPORTAR"))
-        self.menuProgramas.setTitle(_translate("MainBD", "Programas"))
-        self.menuAyuda.setTitle(_translate("MainBD", "Ayuda"))
-        self.actionIndex.setText(_translate("MainBD", "Index"))
-        #self.actionIndex.triggered.connect(self.Index)
-        self.actionSalir.setText(_translate("MainBD", "Salir"))
-        self.actionSobre.setText(_translate("MainBD", "Sobre"))
-        self.actionManual_De_Uso.setText(_translate("MainBD", "Manual De Uso"))
+
+
+
 
     def AbrirArchivo(self):
         #global pathFileName
@@ -165,8 +162,17 @@ class Ui_MainBD(object):
             #self.dzielenieStron(f)
 
     def CargarCSV(self):
-        dir = self.AbrirArchivo()
-        self.GuardarCSV(dir)
+        nombre_tabla = self.input_nombre_bd.text()
+        print(nombre_tabla)
+        if nombre_tabla == "":
+            print("vacio")
+            self.alerta_tabla()
+        else:
+            try:
+                dir = self.AbrirArchivo()
+                self.GuardarCSV(dir)
+            except:
+                print("")
 
     def CrearTabla(self,nombre_tabla):
         query = '''CREATE TABLE IF NOT EXISTS ''' + nombre_tabla + '''
@@ -294,114 +300,7 @@ class Ui_MainBD(object):
         reader = csv.reader(f, delimiter=',')
         self.CrearTabla(nombre_tabla)
         self.Insertar(reader,nombre_tabla)
-        """sql = sqlite3.connect(self.nombre_BD)
-        cur = sql.cursor()
 
-        cur.execute('''CREATE TABLE IF NOT EXISTS ''' + nombre_tabla + '''
-                (user_id Text, 
-                status_id Text , 
-                created_at Datetime, 
-                screen_name Text,
-                text Text,
-                source Text,
-                display_text_width int, 
-                reply_to_status_id Text,
-                reply_to_user_id Text,
-                reply_to_screen_name Text, 
-                is_quote TEXT,
-                is_retweet Text,
-                favorite_count int, 
-                retweet_count int,
-                hashtags text,
-                symbols text, 
-                urls_url text,
-                urls_tco text,
-                urls_expanded_url text,
-                media_url text,
-                media_tco text,
-                media_expanded_url text,
-                media_type text,
-                ext_media_url text,
-                ext_media_tco text,
-                ext_media_expanded_url text,
-                ext_media_type text,
-                mentions_user_id text, 
-                mentions_screen_name text, 
-                lang text, 
-                quoted_status_id text,
-                quoted_text text, 
-                quoted_created_at text, 
-                quoted_source text,
-                quoted_favorite_count int,
-                quoted_retweet_count int, 
-                quoted_user_id text,
-                quoted_screen_name text,
-                quoted_name text,
-                quoted_followers_count int,
-                quoted_friends_count int, 
-                quoted_statuses_count int,
-                quoted_location text, 
-                quoted_description text,
-                quoted_verified text,
-                retweet_status_id text,
-                retweet_text text, 
-                retweet_created_at datetime, 
-                retweet_source text, 
-                retweet_favorite_count int,
-                retweet_retweet_count int,
-                retweet_user_id text, 
-                retweet_screen_name text, 
-                retweet_name text, 
-                retweet_followers_count int,
-                retweet_friends_count int ,
-                retweet_statuses_count int,
-                retweet_location text,
-                retweet_description text,
-                retweet_verified text,
-                place_url text,
-                place_name text,
-                place_full_name text, 
-                place_type text,
-                country text,
-                country_code text,
-                geo_coords text,
-                coords_coords text,
-                bbox_coords text,
-                status_url text,
-                name text, 
-                location text, 
-                description text, 
-                link text, 
-                protected text, 
-                followers_count int,
-                friends_count int,
-                listed_count int, 
-                statuses_count int, 
-                favourites_count int,
-                account_created_at datetime,
-                verified text,
-                profile_url text,
-                profile_expanded_url text,
-                account_lang text, 
-                profile_banner_url text,
-                profile_background_url text,
-                profile_image_url text)''')"""
-        """
-        for row in reader:
-            cur.execute(
-                "INSERT INTO " + nombre_tabla + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9],
-                 row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19],
-                 row[20], row[21], row[22], row[23], row[24], row[25], row[26], row[27], row[28], row[29],
-                 row[30], row[31], row[32], row[33], row[34], row[35], row[36], row[37], row[38], row[39],
-                 row[40], row[41], row[42], row[43], row[44], row[45], row[46], row[47], row[48], row[49],
-                 row[50], row[51], row[52], row[53], row[54], row[55], row[56], row[57], row[58], row[59],
-                 row[60], row[61], row[62], row[63], row[64], row[65], row[66], row[67], row[68], row[69],
-                 row[70], row[71], row[72], row[73], row[74], row[75], row[76], row[77], row[78], row[79],
-                 row[80], row[81], row[82], row[83], row[84], row[85], row[86], row[87]))
-
-        # cur.execute("delete from " + nombre_tabla +" where rowid not in (select  min(rowid) from "+ nombre_tabla + " group by status_id)")
-"""
         # self.limpiarBase()
         f.close()
         #sql.commit()
@@ -444,6 +343,7 @@ class Ui_MainBD(object):
                 self.tabla.setItem(index, 2, QTableWidgetItem(row2[1]))
                 index += 1
 
+
     def BorrarTabla(self):
         #sql = sqlite3.connect(self.nombre_BD)
         #cur = sql.cursor()
@@ -454,12 +354,7 @@ class Ui_MainBD(object):
         query = "vacuum"
         db = self.run_query(query)
         self.tabla.removeRow(selected.row())
-        """print(nombre)
-        cur.execute("DROP TABLE " + nombre)
-        cur.execute("vacuum")
-        self.tabla.removeRow(selected.row())
-        sql.commit()
-        sql.close()"""
+
 
 
     def ExportarBase(self):
@@ -467,10 +362,12 @@ class Ui_MainBD(object):
         sql = sqlite3.connect(self.nombre_BD)
         cur = sql.cursor()
         cur.execute("select * from " + base)
-        with open(base + ".csv", "w", newline='', encoding='utf-8') as csv_file:
+        with open(base + ".csv", "w", newline='',errors='ignore') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
             csv_writer.writerows(cur.fetchall())
+        QMessageBox.warning(self.centralwidget, "EXPORTACION CORRECTA", "EXPORTACION DE BASE TERMINADA.")
+
         sql.close()
 
     def Anadir(self):
@@ -485,51 +382,35 @@ class Ui_MainBD(object):
         print(base)
         print(dir)
         self.Insertar(reader, base)
-        #self.Insertar(csv, base):
-        """name = askopenfilename(initialdir="C:/",
-                               filetypes=(("Text File", ".csv"), ("All Files", ".*")),
-                               title="Choose a file."
-                               )
-        directorio = name
-        f = open(directorio, 'r')
-        reader = csv.reader(f, delimiter=',')
-        sql = sqlite3.connect(self.nombre_BD)
-        cur = sql.cursor()
-        for row in reader:
-            cur.execute(
-                "INSERT INTO " + base + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9],
-                 row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19],
-                 row[20], row[21], row[22], row[23], row[24], row[25], row[26], row[27], row[28], row[29],
-                 row[30], row[31], row[32], row[33], row[34], row[35], row[36], row[37], row[38], row[39],
-                 row[40], row[41], row[42], row[43], row[44], row[45], row[46], row[47], row[48], row[49],
-                 row[50], row[51], row[52], row[53], row[54], row[55], row[56], row[57], row[58], row[59],
-                 row[60], row[61], row[62], row[63], row[64], row[65], row[66], row[67], row[68], row[69],
-                 row[70], row[71], row[72], row[73], row[74], row[75], row[76], row[77], row[78], row[79],
-                 row[80], row[81], row[82], row[83], row[84], row[85], row[86], row[87]))
 
-        f.close()
-        sql.commit()
-        self.get_products()
-        sql.close()"""
+    def closeEvent(self, event):
+        close = QMessageBox.question(self,
+                                     "Salir",
+                                     "Estas seguro que quieres salir?",
+                                     QMessageBox.Yes | QMessageBox.No)
+        if close == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
-    '''
-    def Index(self):
-        self.ventana=QtWidgets.QMainWindow()
-        self.ui=INDEX()
-        self.ui.setupUi(self.ventana)
-        self.ventana.show()
-    '''
+    def alerta_tabla(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Campo de texto no valido")
+        msg.setWindowTitle("Error")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec ()
+
+
+
+
 
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    MainBD = QtWidgets.QMainWindow()
-    ui = Ui_MainBD()
-    ui.setupUi(MainBD)
+    MainBD = Ui_MainBD()
+    MainBD.setupUI()
     MainBD.show()
     sys.exit(app.exec_())
-
-

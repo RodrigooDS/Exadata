@@ -7,26 +7,24 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
-from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, QMessageBox, QHBoxLayout, QLineEdit, QLabel, QGridLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMainWindow, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, \
+                            QMessageBox, QHBoxLayout, QLabel,QGridLayout, QComboBox, QStyleFactory, QListWidget, QListWidgetItem
 from PyQt5.QtGui import QIcon
 from PyQt5.QtSql import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QComboBox, QStyleFactory, QListWidget, \
-    QTableWidget, QTableWidgetItem, QListWidgetItem
-
+from Ayuda import Ui_MainAyuda
 import sqlite3
 import csv
 import sys
 import datetime
 
-class Ui_MainInfluyentes(object):
+class Ui_MainInfluyentes(QMainWindow):
     pathFileName = ""
     nombre_BD = "Base.db"
     nombre_tabla = ""
     def setupUi(self, MainBD):
         MainBD.setObjectName("MainBD")
-        MainBD.resize(900, 600)
+        MainBD.setFixedSize(900, 600)
         self.centralwidget = QtWidgets.QWidget(MainBD)
         self.centralwidget.setObjectName("centralwidget")
 
@@ -56,7 +54,7 @@ class Ui_MainInfluyentes(object):
         # inicio tabla_popularidad
         self.tabla_popularidad = QtWidgets.QTableWidget(self.centralwidget)
         # formato tabla_popularidad posx,posy,tamx,tamy
-        self.tabla_popularidad.setGeometry(QtCore.QRect(10, 310, 510, 250))
+        self.tabla_popularidad.setGeometry(QtCore.QRect(10, 340, 510, 250))
         self.tabla_popularidad.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.tabla_popularidad.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.tabla_popularidad.setColumnCount(2)
@@ -75,27 +73,33 @@ class Ui_MainInfluyentes(object):
         # BOTONES
         # boton exportar_bd
         self.bt_exportar_bd = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_exportar_bd.setGeometry(QtCore.QRect(720, 380, 100, 20))
+        self.bt_exportar_bd.setGeometry(QtCore.QRect(720, 410, 100, 20))
         self.bt_exportar_bd.setObjectName("bt_exportar_bd")
         self.bt_exportar_bd.clicked.connect(self.Exportar_Influencer)
 
         # boton resultado
         self.resultado = QtWidgets.QPushButton(self.centralwidget)
-        self.resultado.setGeometry(QtCore.QRect(550, 380, 100, 20))
+        self.resultado.setGeometry(QtCore.QRect(550, 410, 100, 20))
         self.resultado.setObjectName("resultado")
         self.resultado.clicked.connect(self.Mostrar_Influencer)
 
         # boton exportar_bd2
         self.bt_exportar_bd2 = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_exportar_bd2.setGeometry(QtCore.QRect(720, 510, 100, 20))
+        self.bt_exportar_bd2.setGeometry(QtCore.QRect(720, 540, 100, 20))
         self.bt_exportar_bd2.setObjectName("bt_exportar_bd2")
         self.bt_exportar_bd2.clicked.connect(self.Exportar_Publicaciones)
 
         # boton resultado2
         self.resultado2 = QtWidgets.QPushButton(self.centralwidget)
-        self.resultado2.setGeometry(QtCore.QRect(550, 510, 100, 20))
+        self.resultado2.setGeometry(QtCore.QRect(550, 540, 100, 20))
         self.resultado2.setObjectName("resultado2")
         self.resultado2.clicked.connect(self.Mostrar_Publicaciones)
+
+        # boton recarga_bd
+        self.bt_recarga_bd = QtWidgets.QPushButton(self.centralwidget)
+        self.bt_recarga_bd.setGeometry(QtCore.QRect(10, 300, 510, 20))
+        self.bt_recarga_bd.setObjectName("bt_recarga_bd")
+        self.bt_recarga_bd.clicked.connect(self.CargarTabla)
 
 
 
@@ -112,55 +116,55 @@ class Ui_MainInfluyentes(object):
 
         #LABEL
         self.label_INFLUENCIADORES = QtWidgets.QLabel(self.centralwidget)
-        self.label_INFLUENCIADORES.setGeometry(QtCore.QRect(550, 310, 121, 20))
+        self.label_INFLUENCIADORES.setGeometry(QtCore.QRect(550, 340, 121, 20))
         self.label_INFLUENCIADORES.setObjectName("label_INFLUENCIADORES")
 
         self.label_PUBLICACIONES = QtWidgets.QLabel(self.centralwidget)
-        self.label_PUBLICACIONES.setGeometry(QtCore.QRect(550, 440, 190, 20))
+        self.label_PUBLICACIONES.setGeometry(QtCore.QRect(550, 470, 190, 20))
         self.label_PUBLICACIONES.setObjectName("label_PUBLICACIONES")
 
 
         #TEXTO
         self.fechaInicio = QtWidgets.QDateEdit(self.centralwidget)
-        self.fechaInicio.setGeometry(QtCore.QRect(550, 350, 110, 22))
+        self.fechaInicio.setGeometry(QtCore.QRect(550, 380, 110, 22))
         self.fechaInicio.setObjectName("fechaInicio")
         self.fechaInicio.setCalendarPopup(True)
         self.fechaTermino = QtWidgets.QDateEdit(self.centralwidget)
-        self.fechaTermino.setGeometry(QtCore.QRect(720, 350, 110, 22))
+        self.fechaTermino.setGeometry(QtCore.QRect(720, 380, 110, 22))
         self.fechaTermino.setObjectName("fechaTermino")
         self.fechaTermino.setCalendarPopup(True)
         self.fechaInicio.setDate(QtCore.QDate.currentDate())
         self.fechaTermino.setDate(QtCore.QDate.currentDate())
 
         self.incioLetra = QtWidgets.QLabel(self.centralwidget)
-        self.incioLetra.setGeometry(QtCore.QRect(550, 330, 111, 16))
+        self.incioLetra.setGeometry(QtCore.QRect(550, 360, 111, 16))
         self.incioLetra.setObjectName("incioLetra")
         self.terminoLetra = QtWidgets.QLabel(self.centralwidget)
-        self.terminoLetra.setGeometry(QtCore.QRect(720, 330, 111, 16))
+        self.terminoLetra.setGeometry(QtCore.QRect(720, 360, 111, 16))
         self.terminoLetra.setObjectName("terminoLetra")
 
         # TEXTO3
         self.fechaInicio2 = QtWidgets.QDateEdit(self.centralwidget)
-        self.fechaInicio2.setGeometry(QtCore.QRect(550, 480, 110, 22))
+        self.fechaInicio2.setGeometry(QtCore.QRect(550, 510, 110, 22))
         self.fechaInicio2.setObjectName("fechaInicio1")
         self.fechaInicio2.setCalendarPopup(True)
         self.fechaTermino2 = QtWidgets.QDateEdit(self.centralwidget)
-        self.fechaTermino2.setGeometry(QtCore.QRect(720, 480, 110, 22))
+        self.fechaTermino2.setGeometry(QtCore.QRect(720, 510, 110, 22))
         self.fechaTermino2.setObjectName("fechaTermino1")
         self.fechaTermino2.setCalendarPopup(True)
         self.fechaInicio2.setDate(QtCore.QDate.currentDate())
         self.fechaTermino2.setDate(QtCore.QDate.currentDate())
 
         self.incioLetra4 = QtWidgets.QLabel(self.centralwidget)
-        self.incioLetra4.setGeometry(QtCore.QRect(550, 460, 111, 16))
+        self.incioLetra4.setGeometry(QtCore.QRect(550, 490, 111, 16))
         self.incioLetra4.setObjectName("incioLetra2")
         self.terminoLetra4 = QtWidgets.QLabel(self.centralwidget)
-        self.terminoLetra4.setGeometry(QtCore.QRect(720, 460, 111, 16))
+        self.terminoLetra4.setGeometry(QtCore.QRect(720, 490, 111, 16))
         self.terminoLetra4.setObjectName("terminoLetra2")
 
         # BARRA MENU
         self.menubar = QtWidgets.QMenuBar(MainBD)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 21))
         self.menubar.setObjectName("menubar")
 
         self.Programas = QtWidgets.QMenu(self.menubar)
@@ -172,6 +176,7 @@ class Ui_MainInfluyentes(object):
         self.SobreQue = QtWidgets.QAction(MainBD)
         self.menubar.addAction(self.Ayuda.menuAction())
         self.Ayuda.addAction(self.SobreQue)
+        self.SobreQue.triggered.connect(self.AYUDA)
 
         self.retranslateUi(MainBD)
         QtCore.QMetaObject.connectSlotsByName(MainBD)
@@ -220,6 +225,8 @@ class Ui_MainInfluyentes(object):
         self.bt_exportar_bd2.setText(_translate("MainBD", "EXPORTAR"))
         self.resultado2.setText(_translate("MainBD", "RESULTADO"))
 
+        self.bt_recarga_bd.setText(_translate("MainBD", "RECARGAR TABLA"))
+
         # BARRA MENU
         self.Programas.setTitle(_translate("MainBD", "Programas"))
         self.BaseDeDatos.setText(_translate("MainBD", "Salir"))
@@ -229,17 +236,12 @@ class Ui_MainInfluyentes(object):
         self.SobreQue.setText(_translate("MainBD", "Sobre Que"))
         # self.SobreQue.triggered.connect(exit)
 
-
-
-
-
     def run_query(self, query, parameters=()):
         with sqlite3.connect(self.nombre_BD) as conn:
             cursor = conn.cursor()
             result = cursor.execute(query, parameters)
             conn.commit()
         return result
-
 
     def CargarTabla(self):
         index = 0
@@ -304,7 +306,8 @@ class Ui_MainInfluyentes(object):
 
         cur.execute('select retweet_screen_name USUARIO,count(retweet_screen_name) CANTIDAD from ' +base+ ' ' \
                 'where is_retweet  = "TRUE" and created_at between ("'+fecha_inicio+' 00:00:00") and ("'+fecha_termino+' 23:59:59") group by retweet_screen_name order by count(retweet_screen_name) desc')
-        with open(base+"_INFLUENCER" + ".csv", "w", newline='', encoding='utf-8') as csv_file:
+        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
+        with open(dir, "w", newline='', encoding='utf-8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
             csv_writer.writerows(cur.fetchall())
@@ -318,9 +321,7 @@ class Ui_MainInfluyentes(object):
         fecha_termino = self.fechaTermino2.date().toString("yyyy-MM-dd")
 
         index = 0
-        #CAMBIAR CONSULTA POR MAS CANTIDAD DE PUBLICACIONES!!!!!!!!!!!!!!!!!
         query = 'select screen_name USUARIO,count(screen_name) CANTIDAD from ' +base+ ' where is_retweet="TRUE" and created_at between ("'+fecha_inicio+' 00:00:00") and ("'+fecha_termino+' 23:59:59") group by screen_name order by count(screen_name) desc'
-        ###################################
         db_rows = self.run_query(query)
         for row in db_rows:
             self.tabla_popularidad.setRowCount(index + 1)
@@ -335,10 +336,9 @@ class Ui_MainInfluyentes(object):
         fecha_termino = self.fechaTermino2.date().toString("yyyy-MM-dd")
         sql = sqlite3.connect(self.nombre_BD)
         cur = sql.cursor()
-        #CAMBIAR CONSULTA POR MAS CANTIDAD DE PUBLICACIONES!!!!!!!!!!!!!!!!!
         cur.execute('select screen_name USUARIO,count(screen_name) CANTIDAD from ' +base+ ' where is_retweet="TRUE" and created_at between ("'+fecha_inicio+' 00:00:00") and ("'+fecha_termino+' 23:59:59") group by screen_name order by count(screen_name) desc')
-        ###################################
-        with open(base+"_MASPUBLICACIONES" + ".csv", "w", newline='', encoding='utf-8') as csv_file:
+        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
+        with open(dir, "w", newline='', encoding='utf-8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
             csv_writer.writerows(cur.fetchall())
@@ -356,12 +356,17 @@ class Ui_MainInfluyentes(object):
         else:
             event.ignore()
 
+    def AYUDA(self):
+        self.ventana = Ui_MainInfluyentes()
+        self.ui = Ui_MainAyuda()
+        self.ui.setupUi(self.ventana)
+        self.ventana.show()
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainBD = QtWidgets.QMainWindow()
-    ui = Ui_MainBD()
+    ui = Ui_MainInfluyentes()
     ui.setupUi(MainBD)
     MainBD.show()
     sys.exit(app.exec_())

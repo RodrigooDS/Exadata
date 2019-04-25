@@ -7,26 +7,24 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
-from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, QMessageBox, QHBoxLayout, QLineEdit, QLabel, QGridLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMainWindow, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, \
+                            QMessageBox, QHBoxLayout, QLabel,QGridLayout, QComboBox, QStyleFactory, QListWidget, QListWidgetItem
 from PyQt5.QtGui import QIcon
 from PyQt5.QtSql import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QComboBox, QStyleFactory, QListWidget, \
-    QTableWidget, QTableWidgetItem, QListWidgetItem
-
+from Ayuda import Ui_MainAyuda
 import sqlite3
 import csv
 import sys
 import datetime
 
-class Ui_MainCortar(object):
+class Ui_MainCortar(QMainWindow):
     pathFileName = ""
     nombre_BD = "Base.db"
     nombre_tabla = ""
     def setupUi(self, MainBD):
         MainBD.setObjectName("MainBD")
-        MainBD.resize(900, 600)
+        MainBD.setFixedSize(900, 600)
         self.centralwidget = QtWidgets.QWidget(MainBD)
         self.centralwidget.setObjectName("centralwidget")
 
@@ -59,6 +57,12 @@ class Ui_MainCortar(object):
         self.bt_exportar_bd.setGeometry(QtCore.QRect(550, 300, 100, 20))
         self.bt_exportar_bd.setObjectName("bt_exportar_bd")
         self.bt_exportar_bd.clicked.connect(self.Exportar_Fecha)
+
+        # boton recarga_bd
+        self.bt_recarga_bd = QtWidgets.QPushButton(self.centralwidget)
+        self.bt_recarga_bd.setGeometry(QtCore.QRect(10, 450, 510, 20))
+        self.bt_recarga_bd.setObjectName("bt_recarga_bd")
+        self.bt_recarga_bd.clicked.connect(self.CargarTabla)
 
         #=================================================================================
         MainBD.setCentralWidget(self.centralwidget)
@@ -113,6 +117,7 @@ class Ui_MainCortar(object):
         self.SobreQue = QtWidgets.QAction(MainBD)
         self.menubar.addAction(self.Ayuda.menuAction())
         self.Ayuda.addAction(self.SobreQue)
+        self.SobreQue.triggered.connect(self.AYUDA)
 
 
         self.retranslateUi(MainBD)
@@ -156,7 +161,8 @@ class Ui_MainCortar(object):
 
 
         self.bt_exportar_bd.setText(_translate("MainBD", "EXPORTAR"))
-        #self.bt_exportar_bd2.setText(_translate("MainBD", "EXPORTAR"))
+        self.bt_recarga_bd.setText(_translate("MainBD", "RECARGAR TABLA"))
+
 
 
 
@@ -215,7 +221,8 @@ class Ui_MainCortar(object):
         cur = sql.cursor()
 
         cur.execute("select * from "+base+" where created_at BETWEEN ('"+fecha_inicio+" 00:00:00') and ('"+fecha_termino+" 23:59:59') order by created_at asc")
-        with open(base+"_CORTAR" + ".csv", "w", newline='', encoding='utf-8') as csv_file:
+        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
+        with open(dir, "w", newline='', encoding='utf-8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
             csv_writer.writerows(cur.fetchall())
@@ -232,14 +239,18 @@ class Ui_MainCortar(object):
         else:
             event.ignore()
 
-
+    def AYUDA(self):
+        self.ventana = Ui_MainCortar()
+        self.ui = Ui_MainAyuda()
+        self.ui.setupUi(self.ventana)
+        self.ventana.show()
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainBD = QtWidgets.QMainWindow()
-    ui = Ui_MainBD()
+    ui = Ui_MainCortar()
     ui.setupUi(MainBD)
     MainBD.show()
     sys.exit(app.exec_())

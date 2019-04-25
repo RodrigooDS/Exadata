@@ -7,26 +7,24 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
-from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, QMessageBox, QHBoxLayout, QLineEdit, QLabel, QGridLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMainWindow, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, \
+                            QMessageBox, QHBoxLayout, QLabel,QGridLayout, QComboBox, QStyleFactory, QListWidget, QListWidgetItem
 from PyQt5.QtGui import QIcon
 from PyQt5.QtSql import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QComboBox, QStyleFactory, QListWidget, \
-    QTableWidget, QTableWidgetItem, QListWidgetItem
-
+from Ayuda import Ui_MainAyuda
 import sqlite3
 import csv
 import sys
 import datetime
 
-class Ui_MainMUESTRA(object):
+class Ui_MainMUESTRA(QMainWindow):
     pathFileName = ""
     nombre_BD = "Base.db"
     nombre_tabla = ""
     def setupUi(self, MainBD):
         MainBD.setObjectName("MainBD")
-        MainBD.resize(900, 600)
+        MainBD.setFixedSize(900, 600)
         self.centralwidget = QtWidgets.QWidget(MainBD)
         self.centralwidget.setObjectName("centralwidget")
 
@@ -112,7 +110,7 @@ class Ui_MainMUESTRA(object):
 
         #BARRA MENU
         self.menubar = QtWidgets.QMenuBar(MainBD)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 21))
         self.menubar.setObjectName("menubar")
 
         self.Programas = QtWidgets.QMenu(self.menubar)
@@ -124,8 +122,13 @@ class Ui_MainMUESTRA(object):
         self.SobreQue = QtWidgets.QAction(MainBD)
         self.menubar.addAction(self.Ayuda.menuAction())
         self.Ayuda.addAction(self.SobreQue)
+        self.SobreQue.triggered.connect(self.AYUDA)
 
-
+        # boton recarga_bd
+        self.bt_recarga_bd = QtWidgets.QPushButton(self.centralwidget)
+        self.bt_recarga_bd.setGeometry(QtCore.QRect(10, 450, 510, 20))
+        self.bt_recarga_bd.setObjectName("bt_recarga_bd")
+        self.bt_recarga_bd.clicked.connect(self.CargarTabla)
 
         self.retranslateUi(MainBD)
         QtCore.QMetaObject.connectSlotsByName(MainBD)
@@ -155,6 +158,7 @@ class Ui_MainMUESTRA(object):
         self.label_muestraToda.setText(_translate("MainBD", "MUESTRA POR CANTIDAD DE TWEETS"))
         self.bt_exportar_bd.setText(_translate("MainBD", "EXPORTAR"))
         self.bt_exportar_bd2.setText(_translate("MainBD", "EXPORTAR"))
+        self.bt_recarga_bd.setText(_translate("MainBD", "RECARGAR TABLA"))
 
         #BARRA MENU
         self.Programas.setTitle(_translate("MainBD", "Programas"))
@@ -223,7 +227,8 @@ class Ui_MainMUESTRA(object):
         cur = sql.cursor()
 
         cur.execute("select * from "+base+" where created_at BETWEEN ('"+fecha_inicio+" 00:00:00') and ('"+fecha_termino+" 23:59:59') order by created_at asc, RANDOM() LIMIT 1000")
-        with open(base+"_MUESTRA" + ".csv", "w", newline='', encoding='utf-8') as csv_file:
+        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
+        with open(dir, "w", newline='', encoding='utf-8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
             csv_writer.writerows(cur.fetchall())
@@ -236,7 +241,8 @@ class Ui_MainMUESTRA(object):
         sql = sqlite3.connect(self.nombre_BD)
         cur = sql.cursor()
         cur.execute("SELECT * FROM "+base+" RANDOM LIMIT("+cantidad_tweets+")")
-        with open(base+"_MUESTRA_CANTIDAD" + ".csv", "w", newline='', errors='ignore') as csv_file:
+        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
+        with open(dir, "w", newline='', errors='ignore') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
             csv_writer.writerows(cur.fetchall())
@@ -253,13 +259,19 @@ class Ui_MainMUESTRA(object):
         else:
             event.ignore()
 
+    def AYUDA(self):
+        self.ventana = Ui_MainMUESTRA()
+        self.ui = Ui_MainAyuda()
+        self.ui.setupUi(self.ventana)
+        self.ventana.show()
+
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainBD = QtWidgets.QMainWindow()
-    ui = Ui_MainBD()
+    ui = Ui_MainMUESTRA()
     ui.setupUi(MainBD)
     MainBD.show()
     sys.exit(app.exec_())

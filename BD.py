@@ -6,27 +6,27 @@
 #
 # WARNING! All changes made in this file will be lost!
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
-from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, QMessageBox, QHBoxLayout, QLineEdit, QLabel, QGridLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMainWindow, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, \
+                            QMessageBox, QHBoxLayout, QLabel,QGridLayout, QComboBox, QStyleFactory, QListWidget, QListWidgetItem
 from PyQt5.QtGui import QIcon
 from PyQt5.QtSql import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QComboBox, QStyleFactory, QListWidget, \
-    QTableWidget, QTableWidgetItem, QListWidgetItem
 import os
-#from Index import INDEX
+import re
+from Ayuda import Ui_MainAyuda
+
 
 import sqlite3
 import csv
 import sys
 
-class Ui_MainBD(object):
+class Ui_MainBD(QMainWindow):
     pathFileName = ""
     nombre_BD = "Base.db"
     nombre_tabla = ""
     def setupUi(self, MainBD):
         MainBD.setObjectName("MainBD")
-        MainBD.resize(800, 600)
+        MainBD.setFixedSize(800, 600)
         self.centralwidget = QtWidgets.QWidget(MainBD)
         self.centralwidget.setObjectName("centralwidget")
 
@@ -47,6 +47,7 @@ class Ui_MainBD(object):
         self.tabla.horizontalHeader().setDefaultSectionSize(120)
         self.tabla.horizontalHeader().setStretchLastSection(True)
         self.tabla.verticalHeader().setStretchLastSection(False)
+        
         #fin tabla
 
         self.label = QtWidgets.QLabel(self.centralwidget)
@@ -88,6 +89,11 @@ class Ui_MainBD(object):
         self.bt_exportar_bd.setGeometry(QtCore.QRect(550, 320, 170, 20))
         self.bt_exportar_bd.setObjectName("bt_exportar_bd")
         self.bt_exportar_bd.clicked.connect(self.ExportarBase)
+        # boton recarga_bd
+        self.bt_recarga_bd = QtWidgets.QPushButton(self.centralwidget)
+        self.bt_recarga_bd.setGeometry(QtCore.QRect(10, 370, 375, 20))
+        self.bt_recarga_bd.setObjectName("bt_recarga_bd")
+        self.bt_recarga_bd.clicked.connect(self.CargarTabla)
 
         #=================================================================================
         MainBD.setCentralWidget(self.centralwidget)
@@ -96,6 +102,8 @@ class Ui_MainBD(object):
         self.menubar = QtWidgets.QMenuBar(MainBD)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
         self.menubar.setObjectName("menubar")
+
+
 
         self.Programas = QtWidgets.QMenu(self.menubar)
         self.BaseDeDatos = QtWidgets.QAction(MainBD)
@@ -106,6 +114,9 @@ class Ui_MainBD(object):
         self.SobreQue = QtWidgets.QAction(MainBD)
         self.menubar.addAction(self.Ayuda.menuAction())
         self.Ayuda.addAction(self.SobreQue)
+
+
+
 
         self.retranslateUi(MainBD)
         QtCore.QMetaObject.connectSlotsByName(MainBD)
@@ -121,11 +132,12 @@ class Ui_MainBD(object):
         # BARRA MENU
         self.Programas.setTitle(_translate("MainBD", "Programas"))
         self.BaseDeDatos.setText(_translate("MainBD", "Salir"))
-        self.BaseDeDatos.triggered.connect(exit)
+        #self.BaseDeDatos.triggered.connect()
 
         self.Ayuda.setTitle(_translate("MainBD", "Ayuda"))
         self.SobreQue.setText(_translate("MainBD", "Sobre Que"))
-        #self.SobreQue.triggered.connect(exit)
+        self.SobreQue.triggered.connect(self.AYUDA)
+
 
 
 
@@ -146,14 +158,12 @@ class Ui_MainBD(object):
         self.bt_agregar_bd.setText(_translate("MainBD", "AGREGAR BASE"))
         self.bt_eliminar_bt.setText(_translate("MainBD", "ELIMINAR BASE"))
         self.bt_exportar_bd.setText(_translate("MainBD", "EXPORTAR"))
-
-
-
+        self.bt_recarga_bd.setText(_translate("MainBD", "RECARGAR TABLA"))
 
     def AbrirArchivo(self):
         #global pathFileName
         dir = ""
-        dir, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Wybierz plik', '', 'csv(*.csv)')
+        dir, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Seleccionar archivo', '', 'csv(*.csv)')
         #print("pathFileName-`{}`, \n_-`{}`".format(pathFileName, _))
         if dir:
             f = open(dir, 'rb')
@@ -161,10 +171,25 @@ class Ui_MainBD(object):
             return dir
             #self.dzielenieStron(f)
 
+    def Comprobar_texto(self,texto):
+        #return 0 incorrecto
+        #return 1 correcto
+        if texto == "":
+            print("vacio")
+            return 0
+            #self.alerta_tabla()
+        elif texto != "":
+            campo = re.compile(r"[A-Za-z]{1,20}")
+            if campo.search(texto):  # Comprobemos que esta es una URL valida
+                return 1
+            else:
+                return 0
+
     def CargarCSV(self):
         nombre_tabla = self.input_nombre_bd.text()
         print(nombre_tabla)
-        if nombre_tabla == "":
+        #self.Comprobar_texto(nombre_tabla)
+        if self.Comprobar_texto(nombre_tabla) == 0:
             print("vacio")
             self.alerta_tabla()
         else:
@@ -271,7 +296,7 @@ class Ui_MainBD(object):
         cur = sql.cursor()
         for row in csv:
             cur.execute(
-                "INSERT INTO " + tabla + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO " + tabla +" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9],
                  row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19],
                  row[20], row[21], row[22], row[23], row[24], row[25], row[26], row[27], row[28], row[29],
@@ -309,7 +334,6 @@ class Ui_MainBD(object):
         self.CargarTabla()
         #self.ContadorFilas()
 
-
     def run_query(self, query, parameters=()):
         with sqlite3.connect(self.nombre_BD) as conn:
             cursor = conn.cursor()
@@ -343,7 +367,6 @@ class Ui_MainBD(object):
                 self.tabla.setItem(index, 2, QTableWidgetItem(row2[1]))
                 index += 1
 
-
     def BorrarTabla(self):
         #sql = sqlite3.connect(self.nombre_BD)
         #cur = sql.cursor()
@@ -355,20 +378,21 @@ class Ui_MainBD(object):
         db = self.run_query(query)
         self.tabla.removeRow(selected.row())
 
-
-
     def ExportarBase(self):
-        base = self.tabla.selectedItems()[0].text()
-        sql = sqlite3.connect(self.nombre_BD)
-        cur = sql.cursor()
-        cur.execute("select * from " + base)
-        with open(base + ".csv", "w", newline='',errors='ignore') as csv_file:
-            csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([i[0] for i in cur.description])
-            csv_writer.writerows(cur.fetchall())
-        QMessageBox.warning(self.centralwidget, "EXPORTACION CORRECTA", "EXPORTACION DE BASE TERMINADA.")
-
-        sql.close()
+        try:
+            base = self.tabla.selectedItems()[0].text()
+            sql = sqlite3.connect(self.nombre_BD)
+            cur = sql.cursor()
+            cur.execute("select * from " + base)
+            dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
+            with open(dir, "w", newline='',errors='ignore') as csv_file:
+                csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                csv_writer.writerow([i[0] for i in cur.description])
+                csv_writer.writerows(cur.fetchall())
+            QMessageBox.warning(self.centralwidget, "EXPORTACION CORRECTA", "EXPORTACION DE BASE TERMINADA.")
+            sql.close()
+        except:
+            print("")
 
     def Anadir(self):
         dir = self.AbrirArchivo()
@@ -399,10 +423,16 @@ class Ui_MainBD(object):
         msg.setText("Campo de texto no valido")
         msg.setWindowTitle("Error")
         msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec ()
+        msg.exec()
 
+    def AYUDA(self):
+        self.ventana = Ui_MainBD()
+        self.ui = Ui_MainAyuda()
+        self.ui.setupUi(self.ventana)
+        self.ventana.show()
 
-
+    def SALIR(self):
+        exit()
 
 
 

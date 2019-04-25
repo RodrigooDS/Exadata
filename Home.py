@@ -5,6 +5,7 @@ from BD import Ui_MainBD
 from Muestra import Ui_MainMUESTRA
 from Cortarfecha import Ui_MainCortar
 from Influyentes import Ui_MainInfluyentes
+from Ayuda import Ui_MainAyuda
 import logo_rc
 import sys
 
@@ -13,9 +14,9 @@ class  Ui_MainWindow(QMainWindow):
 
     def setupUI(self):
         # TITULO DE VENTANA
-        self.setObjectName("EXADATA")
+        self.setObjectName("AYUDA")
         # TAMAÑO DE VENTANA
-        self.resize(800, 600)
+        self.setFixedSize(800,600)
 
         #LOGO
         self.centralwidget = QtWidgets.QWidget(self)
@@ -53,13 +54,13 @@ class  Ui_MainWindow(QMainWindow):
         self.Sobre_que = QtWidgets.QAction(self)
         self.Ayuda.addAction(self.Sobre_que)
 
-        self.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(self)
-        self.statusbar.setObjectName("statusbar")
-        self.setStatusBar(self.statusbar)
+        #self.setMenuBar(self.menubar)
+        #self.statusbar = QtWidgets.QStatusBar(self)
+        #self.statusbar.setObjectName("statusbar")
+        #self.setStatusBar(self.statusbar)
         self.menubar.addAction(self.Programas.menuAction())
         self.menubar.addAction(self.Ayuda.menuAction())
-        # self.menubar.addAction(self.Ayuda.)
+
         # FUNCIONES
         self.BARRAMENU(self)
         self.CUADROTEXTO(self)
@@ -84,6 +85,7 @@ class  Ui_MainWindow(QMainWindow):
         self.Muestra_Programa.triggered.connect(self.MUESTRA)
         self.Cortar_Fecha.triggered.connect(self.CORTAR)
         self.Popularidad.triggered.connect(self.INFLUYENTES)
+        self.Sobre_que.triggered.connect(self.AYUDA)
 
 
     def CUADROTEXTO(self, MainWindow):
@@ -129,6 +131,11 @@ class  Ui_MainWindow(QMainWindow):
         self.ui.setupUi(self.ventana)
         self.ventana.show()
 
+    def AYUDA(self):
+        self.ventana = Ui_MainWindow()
+        self.ui = Ui_MainAyuda()
+        self.ui.setupUi(self.ventana)
+        self.ventana.show()
 
     def closeEvent(self, event):
         close = QMessageBox.question(self,

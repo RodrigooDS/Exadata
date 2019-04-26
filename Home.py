@@ -1,16 +1,21 @@
 from PyQt5.QtWidgets import QApplication, QMessageBox, QMainWindow, QAction, qApp
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
 from pprint import pprint
 from BD import Ui_MainBD
 from Muestra import Ui_MainMUESTRA
 from Cortarfecha import Ui_MainCortar
 from Influyentes import Ui_MainInfluyentes
 from Ayuda import Ui_MainAyuda
+
 import logo_rc
 import sys
 
 
-class  Ui_MainWindow(QMainWindow):
+class Ui_MainWindow1(QMainWindow):
+
+    '''def __init__(self, parent):
+        print("da")'''
 
     def setupUI(self):
         # TITULO DE VENTANA
@@ -39,27 +44,37 @@ class  Ui_MainWindow(QMainWindow):
 
         # BOTON PROGRAMAS
         self.Programas = QtWidgets.QMenu(self.menubar)
+        self.Apariencia = QtWidgets.QMenu(self.Programas)
         self.BaseDeDatos = QtWidgets.QAction(self)
         self.Muestra_Programa = QtWidgets.QAction(self)
         self.Cortar_Fecha = QtWidgets.QAction(self)
         self.Popularidad = QtWidgets.QAction(self)
+        self.Oscuro = QtWidgets.QAction(self)
+        self.Claro = QtWidgets.QAction(self)
+
+        # BOTON CONFIGURACIONES
+        self.Configuracion = QtWidgets.QMenu(self.menubar)
+
 
         self.Programas.addAction(self.BaseDeDatos)
         self.Programas.addAction(self.Muestra_Programa)
         self.Programas.addAction(self.Cortar_Fecha)
         self.Programas.addAction(self.Popularidad)
+        self.Apariencia.addAction(self.Oscuro)
+        self.Apariencia.addAction(self.Claro)
+        self.Configuracion.addAction(self.Apariencia.menuAction())
+        self.menubar.addAction(self.Configuracion.menuAction())
 
         # BOTON AYUDA
         self.Ayuda = QtWidgets.QMenu(self.menubar)
         self.Sobre_que = QtWidgets.QAction(self)
         self.Ayuda.addAction(self.Sobre_que)
 
-        #self.setMenuBar(self.menubar)
-        #self.statusbar = QtWidgets.QStatusBar(self)
-        #self.statusbar.setObjectName("statusbar")
-        #self.setStatusBar(self.statusbar)
+
+
         self.menubar.addAction(self.Programas.menuAction())
         self.menubar.addAction(self.Ayuda.menuAction())
+        self.menubar.addAction(self.Configuracion.menuAction())
 
         # FUNCIONES
         self.BARRAMENU(self)
@@ -75,10 +90,15 @@ class  Ui_MainWindow(QMainWindow):
         self.Muestra_Programa.setText(_translate("EXADATA", "Muestra"))
         self.Cortar_Fecha.setText(_translate("EXADATA", "Cortar fecha"))
         self.Popularidad.setText(_translate("EXADATA", "Popularidad"))
+        self.Apariencia.setTitle(_translate("MainWindow", "Apariencia"))
+        self.Oscuro.setText(_translate("MainWindow", "Oscuro"))
+        self.Claro.setText(_translate("MainWindow", "Claro"))
 
 
         self.Ayuda.setTitle(_translate("EXADATA", "Ayuda"))
         self.Sobre_que.setText(_translate("EXADATA", "Sobre que"))
+
+        self.Configuracion.setTitle(_translate("EXADATA", "Configuracion"))
 
         # Funciones de menu
         self.BaseDeDatos.triggered.connect(self.BASE)
@@ -86,6 +106,8 @@ class  Ui_MainWindow(QMainWindow):
         self.Cortar_Fecha.triggered.connect(self.CORTAR)
         self.Popularidad.triggered.connect(self.INFLUYENTES)
         self.Sobre_que.triggered.connect(self.AYUDA)
+        self.Oscuro.triggered.connect(self.darktheme)
+        self.Claro.triggered.connect(self.lighttheme)
 
 
     def CUADROTEXTO(self, MainWindow):
@@ -108,33 +130,29 @@ class  Ui_MainWindow(QMainWindow):
                                             ">$$$$$$$$</span></p></body></html>"))
 
     def BASE(self):
-        self.ventana = Ui_MainWindow()
-        self.ui = Ui_MainBD()
-        self.ui.setupUi(self.ventana)
+        self.ventana = Ui_MainBD()
+        self.ventana.setupUi(self.ventana)
         self.ventana.show()
 
+
     def MUESTRA(self):
-        self.ventana = Ui_MainWindow()
-        self.ui = Ui_MainMUESTRA()
-        self.ui.setupUi(self.ventana)
+        self.ventana = Ui_MainMUESTRA()
+        self.ventana.setupUi(self.ventana)
         self.ventana.show()
 
     def CORTAR(self):
-        self.ventana = Ui_MainWindow()
-        self.ui = Ui_MainCortar()
-        self.ui.setupUi(self.ventana)
+        self.ventana = Ui_MainCortar()
+        self.ventana.setupUi(self.ventana)
         self.ventana.show()
 
     def INFLUYENTES(self):
-        self.ventana = Ui_MainWindow()
-        self.ui = Ui_MainInfluyentes()
-        self.ui.setupUi(self.ventana)
+        self.ventana = Ui_MainInfluyentes()
+        self.ventana.setupUi(self.ventana)
         self.ventana.show()
 
     def AYUDA(self):
-        self.ventana = Ui_MainWindow()
-        self.ui = Ui_MainAyuda()
-        self.ui.setupUi(self.ventana)
+        self.ventana = Ui_MainAyuda()
+        self.ventana.setupUi(self.ventana)
         self.ventana.show()
 
     def closeEvent(self, event):
@@ -147,10 +165,44 @@ class  Ui_MainWindow(QMainWindow):
         else:
             event.ignore()
 
+    def darktheme(self):
+        app.setStyle('Windows')
+        palette = QtGui.QPalette()
+        palette.setColor(QtGui.QPalette.Window, QtGui.QColor(53, 53, 53))
+        palette.setColor(QtGui.QPalette.WindowText, QtCore.Qt.white)
+        palette.setColor(QtGui.QPalette.Base, QtGui.QColor(15, 15, 15))
+        palette.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(53, 53, 53))
+        palette.setColor(QtGui.QPalette.ToolTipBase, QtCore.Qt.red)
+        palette.setColor(QtGui.QPalette.ToolTipText, QtCore.Qt.red)
+        palette.setColor(QtGui.QPalette.Text, QtCore.Qt.white)
+        palette.setColor(QtGui.QPalette.Button, QtGui.QColor(53, 53, 53))
+        palette.setColor(QtGui.QPalette.ButtonText, QtCore.Qt.white)
+        palette.setColor(QtGui.QPalette.BrightText, QtCore.Qt.red)
+        palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(60, 90, 197).lighter())
+        palette.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
+        app.setPalette(palette)
+
+    def lighttheme(self):
+        app.setStyle('Windows')
+        palette = QtGui.QPalette()
+        palette.setColor(QtGui.QPalette.Window, QtGui.QColor(240, 240, 240))
+        palette.setColor(QtGui.QPalette.WindowText, QtCore.Qt.black)
+        palette.setColor(QtGui.QPalette.Base, QtGui.QColor(255, 255, 255))
+        palette.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(255, 0, 0))
+        palette.setColor(QtGui.QPalette.ToolTipBase, QtCore.Qt.black)
+        palette.setColor(QtGui.QPalette.ToolTipText, QtCore.Qt.red)
+        palette.setColor(QtGui.QPalette.Text, QtCore.Qt.black)
+        palette.setColor(QtGui.QPalette.Button, QtGui.QColor(255, 255, 255))
+        palette.setColor(QtGui.QPalette.ButtonText, QtCore.Qt.black)
+        palette.setColor(QtGui.QPalette.BrightText, QtCore.Qt.red)
+        palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(60, 90, 197).lighter())
+        palette.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
+        app.setPalette(palette)
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    # TEMA
     app.setStyle('Windows')
     palette = QtGui.QPalette()
     palette.setColor(QtGui.QPalette.Window, QtGui.QColor(53, 53, 53))
@@ -167,7 +219,7 @@ if __name__ == "__main__":
     palette.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
     app.setPalette(palette)
 
-    window = Ui_MainWindow()
+    window = Ui_MainWindow1()
     window.setupUI()
     window.show()
     sys.exit(app.exec_())

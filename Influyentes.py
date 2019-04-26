@@ -230,11 +230,11 @@ class Ui_MainInfluyentes(QMainWindow):
         # BARRA MENU
         self.Programas.setTitle(_translate("MainBD", "Programas"))
         self.BaseDeDatos.setText(_translate("MainBD", "Salir"))
-        self.BaseDeDatos.triggered.connect(exit)
+
 
         self.Ayuda.setTitle(_translate("MainBD", "Ayuda"))
         self.SobreQue.setText(_translate("MainBD", "Sobre Que"))
-        # self.SobreQue.triggered.connect(exit)
+
 
     def run_query(self, query, parameters=()):
         with sqlite3.connect(self.nombre_BD) as conn:

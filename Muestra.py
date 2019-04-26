@@ -163,11 +163,11 @@ class Ui_MainMUESTRA(QMainWindow):
         #BARRA MENU
         self.Programas.setTitle(_translate("MainBD", "Programas"))
         self.BaseDeDatos.setText(_translate("MainBD", "Salir"))
-        self.BaseDeDatos.triggered.connect(exit)
+
 
         self.Ayuda.setTitle(_translate("MainBD", "Ayuda"))
         self.SobreQue.setText(_translate("MainBD", "Sobre Que"))
-        # self.SobreQue.triggered.connect(exit)
+
 
 
 

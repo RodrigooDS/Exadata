@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFil
                             QMessageBox, QHBoxLayout, QLabel,QGridLayout, QComboBox, QStyleFactory, QListWidget, QListWidgetItem
 from PyQt5.QtGui import QIcon
 from PyQt5.QtSql import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt,QThread, QBasicTimer
 from Ayuda import Ui_MainAyuda
 import sqlite3
 import csv
@@ -184,7 +184,6 @@ class Ui_MainInfluyentes(QMainWindow):
         #new table
         self.CargarTabla()
 
-
     def retranslateUi(self, MainBD):
         _translate = QtCore.QCoreApplication.translate
         MainBD.setWindowTitle(_translate("MainBD", "POPULARIDAD"))
@@ -245,18 +244,16 @@ class Ui_MainInfluyentes(QMainWindow):
 
     def CargarTabla(self):
         index = 0
-        query = 'SELECT tbl_name FROM sqlite_master WHERE type = "table"'
+        query = 'SELECT tabla,strftime("%d-%m-%Y",min(fecha_inicio)),strftime("%d-%m-%Y",max(fecha_termino)), cantidad FROM Master'
+        print(query)
         db_rows = self.run_query(query)
         for row in db_rows:
             self.tabla.setRowCount(index + 1)
-            query = "SELECT strftime('%d-%m-%Y',min(created_at)),strftime('%d-%m-%Y',max(created_at)),count(*) from " + row[0]
-            db_rows2 = self.run_query(query)
-            for row2 in db_rows2:
-                self.tabla.setItem(index, 0, QTableWidgetItem(row[0]))
-                self.tabla.setItem(index, 1, QTableWidgetItem(row2[0]))
-                self.tabla.setItem(index, 2, QTableWidgetItem(row2[1]))
-                self.tabla.setItem(index, 3, QTableWidgetItem(str(row2[2])))
-                index += 1
+            self.tabla.setItem(index, 0, QTableWidgetItem(row[0]))
+            self.tabla.setItem(index, 1, QTableWidgetItem(row[1]))
+            self.tabla.setItem(index, 2, QTableWidgetItem(row[2]))
+            self.tabla.setItem(index, 3, QTableWidgetItem(str(row[3])))
+            index += 1
 
     def ConsultarFecha(self):
         #tabla = self.tabla.selectedItems()[0].text()
@@ -301,19 +298,10 @@ class Ui_MainInfluyentes(QMainWindow):
         base = self.tabla.selectedItems()[0].text()
         fecha_inicio = self.fechaInicio.date().toString("yyyy-MM-dd")
         fecha_termino = self.fechaTermino.date().toString("yyyy-MM-dd")
-        sql = sqlite3.connect(self.nombre_BD)
-        cur = sql.cursor()
-
-        cur.execute('select retweet_screen_name USUARIO,count(retweet_screen_name) CANTIDAD from ' +base+ ' ' \
-                'where is_retweet  = "TRUE" and created_at between ("'+fecha_inicio+' 00:00:00") and ("'+fecha_termino+' 23:59:59") group by retweet_screen_name order by count(retweet_screen_name) desc')
-        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
-        with open(dir, "w", newline='', encoding='utf-8') as csv_file:
-            csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([i[0] for i in cur.description])
-            csv_writer.writerows(cur.fetchall())
-        sql.close()
-        self.Mostrar_Influencer()
-        QMessageBox.warning(self.centralwidget, "EXPORTACION INFLUENCER TERMINADA", "EXPORTACION TABLA INFLUENCER TERMINADA.")
+        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', base, 'csv(*.csv)')
+        print(dir)
+        self.thread = HiloexportarInfluencer(base, fecha_inicio, fecha_termino, self.nombre_BD, dir)
+        self.thread.start()
 
     def Mostrar_Publicaciones(self):
         base = self.tabla.selectedItems()[0].text()
@@ -334,17 +322,10 @@ class Ui_MainInfluyentes(QMainWindow):
         base = self.tabla.selectedItems()[0].text()
         fecha_inicio = self.fechaInicio2.date().toString("yyyy-MM-dd")
         fecha_termino = self.fechaTermino2.date().toString("yyyy-MM-dd")
-        sql = sqlite3.connect(self.nombre_BD)
-        cur = sql.cursor()
-        cur.execute('select screen_name USUARIO,count(screen_name) CANTIDAD from ' +base+ ' where is_retweet="TRUE" and created_at between ("'+fecha_inicio+' 00:00:00") and ("'+fecha_termino+' 23:59:59") group by screen_name order by count(screen_name) desc')
-        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
-        with open(dir, "w", newline='', encoding='utf-8') as csv_file:
-            csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([i[0] for i in cur.description])
-            csv_writer.writerows(cur.fetchall())
-        sql.close()
-        self.Mostrar_Publicaciones()
-        QMessageBox.warning(self.centralwidget, "EXPORTACION MAYOR PUBLICACIONES TERMINADA", "EXPORTACION MAYOR PUBLICACIONES TERMINADA.")
+        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', base, 'csv(*.csv)')
+        print(dir)
+        self.thread = HiloexportarPublicaciones(base, fecha_inicio, fecha_termino, self.nombre_BD, dir)
+        self.thread.start()
 
     def closeEvent(self, event):
         close = QMessageBox.question(self,
@@ -361,6 +342,64 @@ class Ui_MainInfluyentes(QMainWindow):
         self.ui = Ui_MainAyuda()
         self.ui.setupUi(self.ventana)
         self.ventana.show()
+
+class HiloexportarInfluencer(QThread):
+    def __init__(self,nombre_tabla,desde, hasta,nombre_base,dir):
+        QThread.__init__(self)
+        self.base = nombre_tabla
+        self.fecha_inicio = desde
+        self.fecha_termino = hasta
+        self.nombre_BD = nombre_base
+        self.dir = dir
+        self.centralwidget = QtWidgets.QWidget()
+
+    def run(self):
+        print("hilo iniciado")
+        try:
+            sql = sqlite3.connect(self.nombre_BD)
+            cur = sql.cursor()
+            cur.execute('select retweet_screen_name USUARIO,count(retweet_screen_name) CANTIDAD from ' + self.base + ' ' \
+                         'where is_retweet  = "TRUE" and created_at between ("' + self.fecha_inicio + ' 00:00:00") and ("' + self.fecha_termino + ' 23:59:59") group by retweet_screen_name order by count(retweet_screen_name) desc')
+            with open(self.dir, "w", newline='', errors='ignore') as csv_file:
+                csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                csv_writer.writerow([i[0] for i in cur.description])
+                csv_writer.writerows(cur.fetchall())
+                print("GUARDADO")
+            sql.close()
+            # QMessageBox.warning(self.centralwidget, "EXPORTACION INFLUENCER TERMINADA", "EXPORTACION TABLA INFLUENCER TERMINADA.")
+        except:
+            print("")
+        print("hilo terminado")
+
+class HiloexportarPublicaciones(QThread):
+    def __init__(self,nombre_tabla,desde, hasta,nombre_base,dir):
+        QThread.__init__(self)
+        self.base = nombre_tabla
+        self.fecha_inicio = desde
+        self.fecha_termino = hasta
+        self.nombre_BD = nombre_base
+        self.dir = dir
+        self.centralwidget = QtWidgets.QWidget()
+
+    def run(self):
+        print("hilo iniciado")
+        try:
+            sql = sqlite3.connect(self.nombre_BD)
+            cur = sql.cursor()
+            cur.execute(
+                'select screen_name USUARIO,count(screen_name) CANTIDAD from ' + self.base + ' where is_retweet="TRUE" and created_at between ("' + self.fecha_inicio + ' 00:00:00") and ("' + self.fecha_termino + ' 23:59:59") '
+                                                                                                        'group by screen_name order by count(screen_name) desc')
+            with open(self.dir, "w", newline='', errors='ignore') as csv_file:
+                csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                csv_writer.writerow([i[0] for i in cur.description])
+                csv_writer.writerows(cur.fetchall())
+                print("GUARDADO")
+            sql.close()
+            # QMessageBox.warning(self.centralwidget, "EXPORTACION MAYOR PUBLICACIONES TERMINADA", "EXPORTACION MAYOR PUBLICACIONES TERMINADA.")
+        except:
+            print("")
+        print("hilo terminado")
+
 
 if __name__ == "__main__":
     import sys

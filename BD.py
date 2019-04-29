@@ -34,6 +34,7 @@ class Ui_MainBD(QMainWindow):
         self.tabla.horizontalHeader().setDefaultSectionSize(120)
         self.tabla.horizontalHeader().setStretchLastSection(True)
         self.tabla.verticalHeader().setStretchLastSection(False)
+        self.tabla.cellClicked.connect(self.clic)
         
         #fin tabla
 
@@ -106,6 +107,7 @@ class Ui_MainBD(QMainWindow):
         self.tabla_master()
         self.CargarTabla()
 
+
     def retranslateUi(self, MainBD):
         _translate = QtCore.QCoreApplication.translate
         MainBD.setWindowTitle(_translate("MainBD", "Base De Datos"))
@@ -134,6 +136,10 @@ class Ui_MainBD(QMainWindow):
         self.bt_exportar_bd.setText(_translate("MainBD", "EXPORTAR"))
         self.bt_recarga_bd.setText(_translate("MainBD", "RECARGAR TABLA"))
 
+    def clic(self):
+        a = self.tabla.currentRow()
+        self.tabla.selectRow(a)
+
     def AbrirArchivo(self):
         #global pathFileName
         dir = ""
@@ -149,12 +155,15 @@ class Ui_MainBD(QMainWindow):
         #return 0 incorrecto
         #return 1 correcto
         if texto == "":
-            print("vacio")
+            #print("vacio")
             return 0
-            #self.alerta_tabla()
+            self.alerta_tabla()
+        elif texto == "Union" or texto == "UNION" or texto == "union" :
+            return 0
+            self.alerta_tabla()
         elif texto != "":
             campo = re.compile(r"[A-Za-z]{1,20}")
-            if campo.search(texto):  # Comprobemos que esta es una URL valida
+            if campo.search(texto):  # Comprobemos que es  valida
                 return 1
             else:
                 return 0
@@ -170,13 +179,24 @@ class Ui_MainBD(QMainWindow):
                                                    QMessageBox.Yes | QMessageBox.No)
                 if buttonReply == QMessageBox.Yes:
                     print('Si clicked.')
+                    #self.bt_recarga_bd.setEnabled(False)
                     self.hilocarga = Hilocargar(nombre_tabla, self.nombre_BD, dir)
                     self.hilocarga.start()
+                    self.hilocarga.taskFinished.connect(self.Importado)
                     self.hilocarga.taskFinished.connect(self.CargarTabla)
                 if buttonReply == QMessageBox.No:
                     print('No clicked.')
             except:
                 print("")
+
+    def Importado(self):
+        QMessageBox.warning(self.centralwidget, "IMPORTACION CORRECTA", "IMPORTACION DE BASE TERMINADA.")
+
+    def Exportado(self):
+        QMessageBox.warning(self.centralwidget, "EXPORTACION CORRECTA", "EXPORTACION DE BASE TERMINADA.")
+
+    def Cargado(self):
+        QMessageBox.warning(self.centralwidget, "CARGA BASE CORRECTA", "CARGA DE BASE TERMINADA.")
 
     def tabla_master(self):
         table = "Master"
@@ -207,6 +227,8 @@ class Ui_MainBD(QMainWindow):
             index += 1
 
     def BorrarTabla(self):
+        a = self.tabla.currentRow()
+        self.tabla.selectRow(a)
         selected = self.tabla.currentIndex()
         nombre = self.tabla.selectedItems()[0].text()
         print(nombre)
@@ -226,16 +248,17 @@ class Ui_MainBD(QMainWindow):
         print(dir)
         self.thread = Hiloexportar(base,self.nombre_BD,dir)
         self.thread.start()
+        self.thread.taskFinished.connect(self.Exportado)
 
     def Anadir(self):
         try:
             dir = self.AbrirArchivo()
             base = self.tabla.selectedItems()[0].text()
             print(base)
-            #dir = self.AbrirArchivo()
             self.hiloagrega = Hiloagregar(base, self.nombre_BD, dir)
             self.hiloagrega.start()
-            #self.Insertar(reader, base)
+            self.hiloagrega.taskFinished.connect(self.Cargado)
+            self.hiloagrega.taskFinished.connect(self.CargarTabla)
         except:
             print("")
 
@@ -294,7 +317,7 @@ class Hiloeliminar(QThread):
         return result
   
 class Hiloexportar(QThread):
-
+    taskFinished = QtCore.pyqtSignal()
     def __init__(self,nombre_tabla,nombre_base,dir):
         QThread.__init__(self)
         self.base = nombre_tabla
@@ -313,10 +336,11 @@ class Hiloexportar(QThread):
                 csv_writer.writerow([i[0] for i in cur.description])
                 csv_writer.writerows(cur.fetchall())
             sql.close()
-            QMessageBox.warning(self.centralwidget, "EXPORTACION CORRECTA", "EXPORTACION DE BASE TERMINADA.")
+            print("hilo terminado")
+            self.taskFinished.emit()
+
         except:
             print("")
-
 
 class Hilocargar(QThread):
     taskFinished = QtCore.pyqtSignal()
@@ -339,9 +363,7 @@ class Hilocargar(QThread):
         self.CrearTabla(self.base,self.nombre_BD)
         self.Insertar(reader,self.base,self.nombre_BD)
         self.Insertar_Master(self.base,self.nombre_BD)
-        QMessageBox.warning(self.centralwidget, "IMPORTACION CORRECTA", "IMPORTACION DE BASE TERMINADA.")
         self.taskFinished.emit()
-
 
     def CrearTabla(self,nombre_tabla,nombre_base):
         query = '''CREATE TABLE IF NOT EXISTS ''' + nombre_tabla + '''
@@ -483,7 +505,7 @@ class Hilocargar(QThread):
         return result
 
 class Hiloagregar(QThread):
-
+    taskFinished = QtCore.pyqtSignal()
     def __init__(self, nombre_tabla, nombre_base, dir):
         QThread.__init__(self)
         self.base = nombre_tabla
@@ -504,6 +526,9 @@ class Hiloagregar(QThread):
             #print(base)
             #print(dir)
             self.Insertar(reader,self.base,self.nombre_BD)
+            self.limpiarBase(self.base, self.nombre_BD)
+            self.Insertar_Master(self.base, self.nombre_BD)
+            self.taskFinished.emit()
         except:
             print("")
 
@@ -524,15 +549,20 @@ class Hiloagregar(QThread):
                  row[80], row[81], row[82], row[83], row[84], row[85], row[86], row[87]))
         sql.commit()
         sql.close()
-        self.limpiarBase(tabla,nombre_base)
+
+    def Insertar_Master(self,nombre_tabla,nombre_bd):
+        table = "Master"
+        query = 'SELECT min(created_at), max(created_at),count(*) from ' + nombre_tabla
+        db_rows = self.run_query(query,nombre_bd)
+        for row in db_rows:
+            query = "Update Master set fecha_inicio =(?), fecha_termino = (?), cantidad = (?)"
+            parametros = (row[0],row[1], row[2])
+            self.run_query(query, nombre_bd,parametros)
 
     def limpiarBase(self,tabla,nombre_base):
         query = "delete from " + tabla + " where rowid not in (select  min(rowid) from " + tabla + " group by status_id)"
         print(nombre_base)
         db = self.run_query(query,nombre_base)
-        #sql = sqlite3.connect(nombre_base)
-        #cur = sql.cursor()
-        #print(tabla)
 
     def run_query(self, query,nombre_BD, parameters=()):
         #print("run_query 1")

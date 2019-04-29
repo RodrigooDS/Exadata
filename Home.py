@@ -6,6 +6,7 @@ from BD import Ui_MainBD
 from Muestra import Ui_MainMUESTRA
 from Cortarfecha import Ui_MainCortar
 from Influyentes import Ui_MainInfluyentes
+from NubePalabras import Ui_MainNube
 from Ayuda import Ui_MainAyuda
 
 import logo_rc
@@ -49,6 +50,7 @@ class Ui_MainWindow1(QMainWindow):
         self.Muestra_Programa = QtWidgets.QAction(self)
         self.Cortar_Fecha = QtWidgets.QAction(self)
         self.Popularidad = QtWidgets.QAction(self)
+        self.Nube_Palabras = QtWidgets.QAction(self)
         self.Oscuro = QtWidgets.QAction(self)
         self.Claro = QtWidgets.QAction(self)
 
@@ -60,6 +62,7 @@ class Ui_MainWindow1(QMainWindow):
         self.Programas.addAction(self.Muestra_Programa)
         self.Programas.addAction(self.Cortar_Fecha)
         self.Programas.addAction(self.Popularidad)
+        self.Programas.addAction(self.Nube_Palabras)
         self.Apariencia.addAction(self.Oscuro)
         self.Apariencia.addAction(self.Claro)
         self.Configuracion.addAction(self.Apariencia.menuAction())
@@ -90,6 +93,7 @@ class Ui_MainWindow1(QMainWindow):
         self.Muestra_Programa.setText(_translate("EXADATA", "Muestra"))
         self.Cortar_Fecha.setText(_translate("EXADATA", "Cortar fecha"))
         self.Popularidad.setText(_translate("EXADATA", "Popularidad"))
+        self.Nube_Palabras.setText(_translate("EXADATA", "Nube De Palabras"))
         self.Apariencia.setTitle(_translate("MainWindow", "Apariencia"))
         self.Oscuro.setText(_translate("MainWindow", "Oscuro"))
         self.Claro.setText(_translate("MainWindow", "Claro"))
@@ -105,6 +109,7 @@ class Ui_MainWindow1(QMainWindow):
         self.Muestra_Programa.triggered.connect(self.MUESTRA)
         self.Cortar_Fecha.triggered.connect(self.CORTAR)
         self.Popularidad.triggered.connect(self.INFLUYENTES)
+        self.Nube_Palabras.triggered.connect(self.NUBEPALABRAS)
         self.Sobre_que.triggered.connect(self.AYUDA)
         self.Oscuro.triggered.connect(self.darktheme)
         self.Claro.triggered.connect(self.lighttheme)
@@ -147,6 +152,11 @@ class Ui_MainWindow1(QMainWindow):
 
     def INFLUYENTES(self):
         self.ventana = Ui_MainInfluyentes()
+        self.ventana.setupUi(self.ventana)
+        self.ventana.show()
+
+    def NUBEPALABRAS(self):
+        self.ventana = Ui_MainNube()
         self.ventana.setupUi(self.ventana)
         self.ventana.show()
 

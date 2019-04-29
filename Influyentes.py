@@ -244,7 +244,7 @@ class Ui_MainInfluyentes(QMainWindow):
 
     def CargarTabla(self):
         index = 0
-        query = 'SELECT tabla,strftime("%d-%m-%Y",min(fecha_inicio)),strftime("%d-%m-%Y",max(fecha_termino)), cantidad FROM Master'
+        query = 'SELECT tabla,strftime("%d-%m-%Y",(fecha_inicio)),strftime("%d-%m-%Y",(fecha_termino)), cantidad FROM Master'
         print(query)
         db_rows = self.run_query(query)
         for row in db_rows:
@@ -256,11 +256,8 @@ class Ui_MainInfluyentes(QMainWindow):
             index += 1
 
     def ConsultarFecha(self):
-        #tabla = self.tabla.selectedItems()[0].text()
-        #tabla = self.tabla.selectedItems()[3].text()
         a = self.tabla.currentRow()
         self.tabla.selectRow(a)
-        #b = self.tabla.currentColumn()
         f_desde = self.tabla.item(a,1).text()
 
         f_hasta = self.tabla.item(a,2).text()
@@ -302,6 +299,7 @@ class Ui_MainInfluyentes(QMainWindow):
         print(dir)
         self.thread = HiloexportarInfluencer(base, fecha_inicio, fecha_termino, self.nombre_BD, dir)
         self.thread.start()
+        self.thread.taskFinished.connect(self.Exportado)
 
     def Mostrar_Publicaciones(self):
         base = self.tabla.selectedItems()[0].text()
@@ -326,6 +324,10 @@ class Ui_MainInfluyentes(QMainWindow):
         print(dir)
         self.thread = HiloexportarPublicaciones(base, fecha_inicio, fecha_termino, self.nombre_BD, dir)
         self.thread.start()
+        self.thread.taskFinished.connect(self.Exportado)
+
+    def Exportado(self):
+        QMessageBox.warning(self.centralwidget, "EXPORTACION CORRECTA", "EXPORTACION DE BASE TERMINADA.")
 
     def closeEvent(self, event):
         close = QMessageBox.question(self,
@@ -344,6 +346,7 @@ class Ui_MainInfluyentes(QMainWindow):
         self.ventana.show()
 
 class HiloexportarInfluencer(QThread):
+    taskFinished = QtCore.pyqtSignal()
     def __init__(self,nombre_tabla,desde, hasta,nombre_base,dir):
         QThread.__init__(self)
         self.base = nombre_tabla
@@ -364,14 +367,14 @@ class HiloexportarInfluencer(QThread):
                 csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 csv_writer.writerow([i[0] for i in cur.description])
                 csv_writer.writerows(cur.fetchall())
-                print("GUARDADO")
             sql.close()
-            # QMessageBox.warning(self.centralwidget, "EXPORTACION INFLUENCER TERMINADA", "EXPORTACION TABLA INFLUENCER TERMINADA.")
+            self.taskFinished.emit()
         except:
             print("")
         print("hilo terminado")
 
 class HiloexportarPublicaciones(QThread):
+    taskFinished = QtCore.pyqtSignal()
     def __init__(self,nombre_tabla,desde, hasta,nombre_base,dir):
         QThread.__init__(self)
         self.base = nombre_tabla
@@ -393,9 +396,8 @@ class HiloexportarPublicaciones(QThread):
                 csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 csv_writer.writerow([i[0] for i in cur.description])
                 csv_writer.writerows(cur.fetchall())
-                print("GUARDADO")
             sql.close()
-            # QMessageBox.warning(self.centralwidget, "EXPORTACION MAYOR PUBLICACIONES TERMINADA", "EXPORTACION MAYOR PUBLICACIONES TERMINADA.")
+            self.taskFinished.emit()
         except:
             print("")
         print("hilo terminado")

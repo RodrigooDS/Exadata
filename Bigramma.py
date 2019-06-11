@@ -17,8 +17,10 @@ stop_words_en = set(stopwords.words('english'))
 # Concatenar las stopwords aplicándose a una cuenta que genera contenido en inglés y español
 stop_words = stop_words_sp | stop_words_en
 from nltk import tokenize
+from nltk import bigrams
 from nltk.tokenize import word_tokenize
 import re
+
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -33,7 +35,7 @@ import csv
 import sys
 import datetime
 
-class Ui_MainNube(QMainWindow):
+class Ui_MainBigrama(QMainWindow):
     pathFileName = ""
     nombre_bd = "Base.db"
     nombre_tabla = ""
@@ -79,14 +81,16 @@ class Ui_MainNube(QMainWindow):
         self.tabla_popularidad.setGeometry(QtCore.QRect(10, 340, 510, 250))
         self.tabla_popularidad.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.tabla_popularidad.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
-        self.tabla_popularidad.setColumnCount(2)
+        self.tabla_popularidad.setColumnCount(3)
         self.tabla_popularidad.setObjectName("tabla_popularidad")
         self.tabla_popularidad.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tabla_popularidad.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         self.tabla_popularidad.setHorizontalHeaderItem(1, item)
-        self.tabla_popularidad.horizontalHeader().setDefaultSectionSize(250)
+        item = QtWidgets.QTableWidgetItem()
+        self.tabla_popularidad.setHorizontalHeaderItem(2, item)
+        self.tabla_popularidad.horizontalHeader().setDefaultSectionSize(150)
         self.tabla_popularidad.horizontalHeader().setStretchLastSection(True)
         self.tabla_popularidad.verticalHeader().setStretchLastSection(False)
         #self.tabla_popularidad.cellClicked.connect(self.ConsultarFecha)
@@ -103,7 +107,7 @@ class Ui_MainNube(QMainWindow):
         self.resultado = QtWidgets.QPushButton(self.centralwidget)
         self.resultado.setGeometry(QtCore.QRect(550, 410, 100, 20))
         self.resultado.setObjectName("resultado")
-        self.resultado.clicked.connect(self.Resultado)
+        self.resultado.clicked.connect(self.test)
 
         # boton recarga_bd
         self.bt_recarga_bd = QtWidgets.QPushButton(self.centralwidget)
@@ -164,7 +168,7 @@ class Ui_MainNube(QMainWindow):
         self.BaseDeDatos = QtWidgets.QAction(MainBD)
         self.menubar.addAction(self.Programas.menuAction())
         self.Programas.addAction(self.BaseDeDatos)
-        self.BaseDeDatos.triggered.connect(self.close)
+        self.Programas.triggered.connect(self.close)
 
         self.Ayuda = QtWidgets.QMenu(self.menubar)
         self.SobreQue = QtWidgets.QAction(MainBD)
@@ -179,12 +183,12 @@ class Ui_MainNube(QMainWindow):
         self.tabla_master()
         self.CargarTabla()
         self.progressBar.hide()
-        self.label_EXPORTAR.hide()
         self.bt_exportar_bd.hide()
+        self.label_EXPORTAR.hide()
 
     def retranslateUi(self, MainBD):
         _translate = QtCore.QCoreApplication.translate
-        MainBD.setWindowTitle(_translate("MainBD", "NUBE DE PALABRAS"))
+        MainBD.setWindowTitle(_translate("MainBD", "Bigrama"))
 
         #inicio tabla
         item = self.tabla.horizontalHeaderItem(0)
@@ -202,6 +206,8 @@ class Ui_MainNube(QMainWindow):
         item = self.tabla_popularidad.horizontalHeaderItem(0)
         item.setText(_translate("MainBD", "PALABRA"))
         item = self.tabla_popularidad.horizontalHeaderItem(1)
+        item.setText(_translate("MainBD", "PALABRA"))
+        item = self.tabla_popularidad.horizontalHeaderItem(2)
         item.setText(_translate("MainBD", "CANTIDAD DE VECES OCUPADA"))
         # fin tabla_popularidad
 
@@ -264,6 +270,20 @@ class Ui_MainNube(QMainWindow):
         # print(month)
         self.fechaTermino.setDate(QtCore.QDate(int(year), int(month), int(day)))
 
+    def Mostrar_Publicaciones(self):
+        nombre_bd = "Base.db"
+        base = self.tabla.selectedItems()[0].text()
+        index = 0
+        query = 'SELECT palabras1,palabras2,count(palabras1) FROM BIGRAMA where id="'+base+'" GROUP BY palabras1,palabras2 order by count(palabras1) desc'
+        db_rows = self.run_query(query,nombre_bd)
+        for row in db_rows:
+            self.tabla_popularidad.setRowCount(index + 1)
+            self.tabla_popularidad.setItem(index, 0, QTableWidgetItem(row[0]))
+            self.tabla_popularidad.setItem(index, 1, QTableWidgetItem(row[1]))
+            self.tabla_popularidad.setItem(index, 2, QTableWidgetItem(str(row[2])))
+            index += 1
+        QMessageBox.warning(self.centralwidget, "TABLA NUBE DE PALABRAS TERMINADA", "TABLA NUBE DE PALABRAS TERMINADA.")
+
     def Exportado(self):
         QMessageBox.warning(self.centralwidget, "EXPORTACION CORRECTA", "EXPORTACION DE BASE TERMINADA.")
 
@@ -293,24 +313,9 @@ class Ui_MainNube(QMainWindow):
                                 cantidad text)'''
         self.run_query(query, nombre_bd)
 
-        query = "CREATE TABLE IF NOT EXISTS Word (palabras Text collate nocase,id Text)"
+        query = "CREATE TABLE IF NOT EXISTS BIGRAMA (palabras1 Text collate nocase,palabras2 Text collate nocase, id Text)"
         print("tabla creada")
         self.run_query(query,nombre_bd)
-
-    def Mostrar_Publicaciones(self):
-        nombre_bd = "Base.db"
-        base = self.tabla.selectedItems()[0].text()
-
-
-        index = 0
-        query = 'select palabras, count(palabras) from Word where id="'+base+'" group by palabras order by count(palabras) desc'
-        db_rows = self.run_query(query,nombre_bd)
-        for row in db_rows:
-            self.tabla_popularidad.setRowCount(index + 1)
-            self.tabla_popularidad.setItem(index, 0, QTableWidgetItem(row[0]))
-            self.tabla_popularidad.setItem(index, 1, QTableWidgetItem(str(row[1])))
-            index += 1
-        QMessageBox.warning(self.centralwidget, "TABLA NUBE DE PALABRAS TERMINADA", "TABLA NUBE DE PALABRAS TERMINADA.")
 
     def STOPBARRA(self):
         self.progressBar.setRange(0, 1)
@@ -327,14 +332,11 @@ class Ui_MainNube(QMainWindow):
         self.resultado.setEnabled(False)
         self.bt_recarga_bd.setEnabled(False)
 
-
-    def Resultado(self):
+    def test(self):
         base = self.tabla.selectedItems()[0].text()
         nombre_bd = "Base.db"
         fecha_inicio = self.fechaInicio.date().toString("yyyy-MM-dd")
         fecha_termino = self.fechaTermino.date().toString("yyyy-MM-dd")
-
-
         self.progressBar.show()
         self.progressBar.setRange(0, 0)
         self.BLOQUEO()
@@ -342,6 +344,7 @@ class Ui_MainNube(QMainWindow):
         self.thread.start()
         self.thread.taskFinished.connect(self.STOPBARRA)
         self.thread.taskFinished.connect(self.Mostrar_Publicaciones)
+
 
     def Exportar(self):
         base = self.tabla.selectedItems()[0].text()
@@ -360,15 +363,15 @@ class Ui_MainNube(QMainWindow):
         self.thread.taskFinished.connect(self.STOPBARRA)
         self.thread.taskFinished.connect(self.Mostrar_Publicaciones)
 
-
 class Hilopalabras(QThread):
     taskFinished = QtCore.pyqtSignal()
-    def __init__(self,nombre_tabla,nombre_base,desde,hasta):
+    def __init__(self, nombre_tabla, nombre_base, desde, hasta):
         QThread.__init__(self)
         self.base = nombre_tabla
         self.nombre_bd = nombre_base
         self.fecha_inicio = desde
         self.fecha_termino = hasta
+
 
     def run(self):
         start_time = time()
@@ -380,7 +383,6 @@ class Hilopalabras(QThread):
         print(elapsed_time)
         self.taskFinished.emit()
 
-
     def run_query(self, query, nombre_bd, parameters=()):
         with sqlite3.connect(nombre_bd) as conn:
             cursor = conn.cursor()
@@ -389,26 +391,31 @@ class Hilopalabras(QThread):
         return result
 
     def buscador(self,tabla,base):
+
         query = 'select text from '+self.base+' where created_at between ("' + self.fecha_inicio + ' 00:00:00") and ("' + self.fecha_termino + ' 23:59:59")'
-        print(query)
         db = self.run_query(query,base)
+
         self.procesador_tweet(db, tabla,base)
 
     def procesador_tweet(self, tweets, tabla, base):
-        test = []
+
         stop_words = set(stopwords.words('spanish'))
-        texto = ""
+        x = []
+        y = []
         a = 0
-        for i in tweets:
-            word_tokens = word_tokenize(str(i))
-            filtered_sentence = [w for w in word_tokens if not w in stop_words]
-            for w in word_tokens:
-                if w not in stop_words:
-                    if w.isalnum():
-                        if w != "https":
-                            test.append(w)
-            a = a + 1
-        self.wordcloud(test, tabla, base)
+        for text in tweets:
+
+            res = [(x, i.split()[j + 1]) for i in text
+                   for j, x in enumerate(i.split()) if j < len(i.split()) - 1]
+            #print(str(a) + "   =(despues)= " + str(res))
+            for i in range(len(res)):
+                if res[i][0].isalnum() and res[i][1].isalnum():
+                    if res[i][0]!=stop_words and res[i][1]!=stop_words:
+                        #print(str(res[i][0]) + " ==== " + str(res[i][1]))
+                        x.append((res[i][0]))
+                        y.append(res[i][1])
+            a = a +1
+        self.wordcloud(x,y,tabla, base)
 
     def removedor_emoji(self, string):
         emoji_pattern = re.compile("["
@@ -421,25 +428,19 @@ class Hilopalabras(QThread):
                                    "]+", flags=re.UNICODE)
         return emoji_pattern.sub(r'', string)
 
-    def wordcloud(self, tweet, tabla, base):
-        print(base)
+    def wordcloud(self, x,y, tabla, base):
         conn = sqlite3.connect(base)
-        for w in tweet:
-            conn.execute("insert into Word (palabras,id) values (?,?);", (w, tabla))
+        for w in range(len(x)):
+            conn.execute("insert into BIGRAMA (palabras1,palabras2,id) values (?,?,?);", (x[w],y[w], tabla))
         conn.commit()
         conn.close()
 
     def eliminarWord(self, tabla, base):
-        query = 'delete from Word where id="'+tabla+'"'
+        query = 'delete from BIGRAMA where id="'+tabla+'"'
         print(query)
         db = self.run_query(query, base)
         print("Tabla Limpia")
         print("====================================================================================")
-
-
-
-
-
 
 class Hiloexportar(QThread):
     taskFinished = QtCore.pyqtSignal()
@@ -456,7 +457,7 @@ class Hiloexportar(QThread):
         #self.eliminarWord(self.base, self.nombre_bd)
         sql = sqlite3.connect(self.nombre_bd)
         cur = sql.cursor()
-        cur.execute('select palabras, count(palabras) as cantidad from Word where id="'+self.base+'" group by palabras order by cantidad desc')
+        cur.execute('SELECT palabras1,palabras2,count(palabras1) FROM BIGRAMA WHERE ID="'+self.base+'" GROUP BY palabras1,palabras2 order by count(palabras1) desc')
         with open(self.dir, "w", newline='', errors='ignore') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([i[0] for i in cur.description])
@@ -479,14 +480,11 @@ class Hiloexportar(QThread):
             conn.commit()
         return result'''
 
-
-
-
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainBD = QtWidgets.QMainWindow()
-    ui = Ui_MainNube()
+    ui = Ui_MainBigrama()
     ui.setupUi(MainBD)
     MainBD.show()
     sys.exit(app.exec_())

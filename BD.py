@@ -1,25 +1,70 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMainWindow, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, \
-                            QMessageBox, QHBoxLayout, QLabel,QGridLayout, QComboBox, QStyleFactory, QListWidget, QListWidgetItem
-from PyQt5.QtGui import QIcon
+                            QMessageBox, QHBoxLayout, QLabel,QGridLayout, QComboBox, QStyleFactory, QListWidget, QListWidgetItem,QFrame
+from PyQt5.QtGui import QIcon, QPalette, QColor, QPixmap, QFont
 from PyQt5.QtSql import *
 from PyQt5.QtCore import Qt,QThread, QBasicTimer
 import os, re , sqlite3 , csv, sys
-from Ayuda import Ui_MainAyuda
 
-class Ui_MainBD(QMainWindow):
+
+class Main_DB(QMainWindow):
     pathFileName = ""
     nombre_BD = "Base.db"
     nombre_tabla = ""
-    def setupUi(self, MainBD):
-        MainBD.setObjectName("MainBD")
-        MainBD.setFixedSize(800, 600)
-        self.centralwidget = QtWidgets.QWidget(MainBD)
+    def __init__(self, parent=None):
+        super(Main_DB, self).__init__(parent)
+        self.setWindowTitle("EXADATA")
+        self.setFixedSize(800, 600)
+        self.setWindowIcon(QIcon("icono.jpg"))
+        self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
+        # FRAME
+        paleta = QPalette()
+        paleta.setColor(QPalette.Background, QColor(51, 0, 102))
+
+        frame = QFrame(self)
+        frame.setFrameShape(QFrame.NoFrame)
+        frame.setFrameShadow(QFrame.Sunken)
+        frame.setAutoFillBackground(True)
+        frame.setPalette(paleta)
+        frame.setFixedWidth(800)
+        frame.setFixedHeight(100)
+        frame.move(0, 0)
+
+
+        labelIcono = QLabel(frame)
+        labelIcono.setFixedWidth(65)
+        labelIcono.setFixedHeight(65)
+        labelIcono.setPixmap(QPixmap("icono.jpg").scaled(65, 65, Qt.KeepAspectRatio,
+                                                         Qt.SmoothTransformation))
+        labelIcono.move(10, 28)
+
+        fuenteTitulo = QFont()
+        fuenteTitulo.setPointSize(25)
+        fuenteTitulo.setBold(True)
+
+        labelTitulo = QLabel("<font color='white'>EXADATA</font>", frame)
+        labelTitulo.setFont(fuenteTitulo)
+        labelTitulo.move(85, 30)
+
+        fuenteSubtitulo = QFont()
+        fuenteSubtitulo.setPointSize(13)
+
+        labelSubtitulo = QLabel("<font color='white'>Análisis de Tweets "
+                                , frame)
+        labelSubtitulo.setFont(fuenteSubtitulo)
+        labelSubtitulo.move(85, 68)
+
+        #BARRA
+        self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
+        self.progressBar.setGeometry(QtCore.QRect(10, 400, 375, 23))
+        self.progressBar.setProperty("value", 24)
+        self.progressBar.setTextVisible(False)
+        self.progressBar.setObjectName("progressBar")
 
         #inicio tabla
         self.tabla = QtWidgets.QTableWidget(self.centralwidget)
-        self.tabla.setGeometry(QtCore.QRect(10, 110, 375, 250))
+        self.tabla.setGeometry(QtCore.QRect(10, 110, 500, 400))
         self.tabla.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.tabla.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.tabla.setColumnCount(3)
@@ -31,7 +76,7 @@ class Ui_MainBD(QMainWindow):
         self.tabla.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.tabla.setHorizontalHeaderItem(2, item)
-        self.tabla.horizontalHeader().setDefaultSectionSize(120)
+        self.tabla.horizontalHeader().setDefaultSectionSize(165)
         self.tabla.horizontalHeader().setStretchLastSection(True)
         self.tabla.verticalHeader().setStretchLastSection(False)
         self.tabla.cellClicked.connect(self.clic)
@@ -44,79 +89,78 @@ class Ui_MainBD(QMainWindow):
 
         #qlineedit nombre base
         self.input_nombre_bd = QtWidgets.QLineEdit(self.centralwidget)
-        self.input_nombre_bd.setGeometry(QtCore.QRect(550, 110, 170, 20))
+        self.input_nombre_bd.setGeometry(QtCore.QRect(550, 130, 170, 20))
         self.input_nombre_bd.setObjectName("input_nombre_bd")
 
         # label
         #label nombre_bd
         self.label_nombre_base = QtWidgets.QLabel(self.centralwidget)
-        self.label_nombre_base.setGeometry(QtCore.QRect(395, 110, 141, 16))
+        self.label_nombre_base.setGeometry(QtCore.QRect(550, 110, 180, 20))
         self.label_nombre_base.setObjectName("label_nombre_base")
         # label editar_bd
         self.label_editar_bd = QtWidgets.QLabel(self.centralwidget)
-        self.label_editar_bd.setGeometry(QtCore.QRect(550, 230, 121, 16))
+        self.label_editar_bd.setGeometry(QtCore.QRect(550, 230, 180, 16))
         self.label_editar_bd.setObjectName("label_editar_bd")
 
         # BOTONES
         #boton importar
         self.bt_importar = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_importar.setGeometry(QtCore.QRect(550, 150, 170, 20))
+        self.bt_importar.setGeometry(QtCore.QRect(550, 160, 170, 21))
         self.bt_importar.setObjectName("bt_importar")
         # boton agregar_bd
         self.bt_agregar_bd = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_agregar_bd.setGeometry(QtCore.QRect(550, 260, 170, 20))
+        self.bt_agregar_bd.setGeometry(QtCore.QRect(550, 260, 170, 21))
         self.bt_agregar_bd.setObjectName("bt_agregar_bd")
         self.bt_agregar_bd.clicked.connect(self.Anadir)
         # boton eliminar_bd
         self.bt_eliminar_bt = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_eliminar_bt.setGeometry(QtCore.QRect(550, 290, 170, 20))
+        self.bt_eliminar_bt.setGeometry(QtCore.QRect(550, 290, 170, 21))
         self.bt_eliminar_bt.setObjectName("bt_eliminar_bt")
         self.bt_eliminar_bt.clicked.connect(self.BorrarTabla)
         # boton exportar_bd
         self.bt_exportar_bd = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_exportar_bd.setGeometry(QtCore.QRect(550, 320, 170, 20))
+        self.bt_exportar_bd.setGeometry(QtCore.QRect(550, 320, 170, 21))
         self.bt_exportar_bd.setObjectName("bt_exportar_bd")
         self.bt_exportar_bd.clicked.connect(self.ExportarBase)
         # boton recarga_bd
         self.bt_recarga_bd = QtWidgets.QPushButton(self.centralwidget)
-        self.bt_recarga_bd.setGeometry(QtCore.QRect(10, 370, 375, 20))
+        self.bt_recarga_bd.setGeometry(QtCore.QRect(10, 520, 500, 21))
         self.bt_recarga_bd.setObjectName("bt_recarga_bd")
         self.bt_recarga_bd.clicked.connect(self.CargarTabla)
 
         #=================================================================================
-        MainBD.setCentralWidget(self.centralwidget)
+        self.setCentralWidget(self.centralwidget)
 
         # BARRA MENU
-        self.menubar = QtWidgets.QMenuBar(MainBD)
+        self.menubar = QtWidgets.QMenuBar(self)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
         self.menubar.setObjectName("menubar")
         self.Programas = QtWidgets.QMenu(self.menubar)
-        self.BaseDeDatos = QtWidgets.QAction(MainBD)
+        self.BaseDeDatos = QtWidgets.QAction(self)
         self.menubar.addAction(self.Programas.menuAction())
         self.Programas.addAction(self.BaseDeDatos)
         self.Ayuda = QtWidgets.QMenu(self.menubar)
-        self.SobreQue = QtWidgets.QAction(MainBD)
+        self.SobreQue = QtWidgets.QAction(self)
         self.menubar.addAction(self.Ayuda.menuAction())
         self.Ayuda.addAction(self.SobreQue)
 
 
-
-        self.retranslateUi(MainBD)
-        QtCore.QMetaObject.connectSlotsByName(MainBD)
-        #new table
+        self.retranslateUi()
         self.tabla_master()
         self.CargarTabla()
+        self.progressBar.hide()
 
 
-    def retranslateUi(self, MainBD):
+    def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        MainBD.setWindowTitle(_translate("MainBD", "Base De Datos"))
+        #MainBD.setWindowTitle(_translate("MainBD", "Base De Datos"))
         # BARRA MENU
         self.Programas.setTitle(_translate("MainBD", "Programas"))
         self.BaseDeDatos.setText(_translate("MainBD", "Salir"))
         self.Ayuda.setTitle(_translate("MainBD", "Ayuda"))
         self.SobreQue.setText(_translate("MainBD", "Sobre Que"))
         self.SobreQue.triggered.connect(self.AYUDA)
+        self.BaseDeDatos.triggered.connect(self.close)
         #inicio tabla
         item = self.tabla.horizontalHeaderItem(0)
         item.setText(_translate("MainBD", "NOMBRE"))
@@ -140,16 +184,7 @@ class Ui_MainBD(QMainWindow):
         a = self.tabla.currentRow()
         self.tabla.selectRow(a)
 
-    def AbrirArchivo(self):
-        #global pathFileName
-        dir = ""
-        dir, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Seleccionar archivo', '', 'csv(*.csv)')
-        #print("pathFileName-`{}`, \n_-`{}`".format(pathFileName, _))
-        if dir:
-            f = open(dir, 'rb')
-            #print(pathFileName)
-            return dir
-            #self.dzielenieStron(f)
+
 
     def Comprobar_texto(self,texto):
         #return 0 incorrecto
@@ -162,38 +197,85 @@ class Ui_MainBD(QMainWindow):
             return 0
             self.alerta_tabla()
         elif texto != "":
-            campo = re.compile(r"[A-Za-z]{1,20}")
-            if campo.search(texto):  # Comprobemos que es  valida
+            if texto.isalnum() and len(texto)<=30:  # Comprobemos que es  valida
                 return 1
             else:
                 return 0
 
     def CargarCSV(self):
         nombre_tabla = self.input_nombre_bd.text()
-        if self.Comprobar_texto(nombre_tabla) == 0:
-            self.alerta_tabla()
-        else:
-            try:
-                dir = self.AbrirArchivo()
-                buttonReply = QMessageBox.question(self, 'GUARDAR BASE', "Quieres guardar la base de "+nombre_tabla+"?",
+        dir = ""
+        try:
+            if self.Comprobar_texto(nombre_tabla) == 0:
+                self.alerta_tabla()
+
+            else:
+                query = 'SELECT min(created_at), max(created_at),count(*) from ' + nombre_tabla
+                print(query)
+                db_rows = self.run_query(query)
+                print("TABLA EXISTENTE")
+                buttonReply = QMessageBox.question(self, 'BASE YA EXISTENTE',
+                                                   "Quieres añadir la base agregada a la base ya existente?",
                                                    QMessageBox.Yes | QMessageBox.No)
                 if buttonReply == QMessageBox.Yes:
                     print('Si clicked.')
-                    #self.bt_recarga_bd.setEnabled(False)
-                    self.hilocarga = Hilocargar(nombre_tabla, self.nombre_BD, dir)
-                    self.hilocarga.start()
-                    self.hilocarga.taskFinished.connect(self.Importado)
-                    self.hilocarga.taskFinished.connect(self.CargarTabla)
+                    dir, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Seleccionar archivo', '', 'csv(*.csv)')
+                    if dir:
+                        f = open(dir, 'rb')
+                        return dir
+                        print(nombre_tabla)
+                        self.hiloagrega = Hiloagregar(nombre_tabla, self.nombre_BD, dir)
+                        self.hiloagrega.start()
+                        self.hiloagrega.taskFinished.connect(self.Cargado)
+                        self.hiloagrega.taskFinished.connect(self.CargarTabla)
                 if buttonReply == QMessageBox.No:
                     print('No clicked.')
-            except:
-                print("")
+
+
+        except Exception:
+            print("NO EXISTE")
+            if self.Comprobar_texto(nombre_tabla) == 0:
+                self.alerta_tabla()
+            else:
+                try:
+                    dir, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Seleccionar archivo', '', 'csv(*.csv)')
+                    if dir:
+                        f = open(dir, 'rb')
+                        print(dir)
+
+                        buttonReply = QMessageBox.question(self, 'GUARDAR BASE',
+                                                           "Quieres guardar la base de " + nombre_tabla + "?",
+                                                           QMessageBox.Yes | QMessageBox.No)
+                        if buttonReply == QMessageBox.Yes:
+                            print('Si clicked.')
+                            self.progressBar.show()
+                            self.progressBar.setRange(0, 0)
+                            self.BLOQUEO()
+                            self.hilocarga = Hilocargar(nombre_tabla, self.nombre_BD, dir)
+                            self.hilocarga.start()
+                            self.hilocarga.taskFinished.connect(self.Importado)
+                            self.hilocarga.taskFinished.connect(self.CargarTabla)
+                            self.hilocarga.taskFinishedBarra.connect(self.STOPBARRA)
+
+                        if buttonReply == QMessageBox.No:
+                            print('No clicked.')
+                            print(dir)
+                    else:
+                        print("CANCELADO")
+                except:
+                    print("")
 
     def Importado(self):
         QMessageBox.warning(self.centralwidget, "IMPORTACION CORRECTA", "IMPORTACION DE BASE TERMINADA.")
 
     def Exportado(self):
         QMessageBox.warning(self.centralwidget, "EXPORTACION CORRECTA", "EXPORTACION DE BASE TERMINADA.")
+
+    def Eliminado(self):
+        QMessageBox.warning(self.centralwidget, "ELIMINACION DE BASE COMPLETADA", "ELIMINACION DE BASE COMPLETADA.")
+
+    def ALERTA(self):
+        QMessageBox.warning(self.centralwidget, "BASE NO SELECCIONADA", "POR FAVOR, SELECCIONE LA BASE A TRABAJAR.")
 
     def Cargado(self):
         QMessageBox.warning(self.centralwidget, "CARGA BASE CORRECTA", "CARGA DE BASE TERMINADA.")
@@ -215,6 +297,7 @@ class Ui_MainBD(QMainWindow):
         return result
 
     def CargarTabla(self):
+
         index = 0
         query = 'SELECT tabla,fecha_inicio,fecha_termino FROM Master'
         print(query)
@@ -227,50 +310,84 @@ class Ui_MainBD(QMainWindow):
             index += 1
 
     def BorrarTabla(self):
-        a = self.tabla.currentRow()
-        self.tabla.selectRow(a)
-        selected = self.tabla.currentIndex()
-        nombre = self.tabla.selectedItems()[0].text()
-        print(nombre)
-        buttonReply = QMessageBox.question(self, 'ELIMINAR BASE', "QUIERES BORRAR LA BASE " + nombre + "?",
-                                           QMessageBox.Yes | QMessageBox.No)
-        if buttonReply == QMessageBox.Yes:
-            print('Si clicked.')
-            self.hiloeliminar = Hiloeliminar(nombre, self.nombre_BD)
-            self.hiloeliminar.start()
-            self.tabla.removeRow(selected.row())
-        if buttonReply == QMessageBox.No:
-            print('No clicked.')
+        try:
+            #a = self.tabla.currentRow()
+            #self.tabla.selectRow(a)
+            selected = self.tabla.currentIndex()
+            nombre = self.tabla.selectedItems()[0].text()
+            print(nombre)
+            buttonReply = QMessageBox.question(self, 'ELIMINAR BASE', "QUIERES BORRAR LA BASE " + nombre + "?",
+                                               QMessageBox.Yes | QMessageBox.No)
+            if buttonReply == QMessageBox.Yes:
+                print('Si clicked.')
+                self.progressBar.show()
+                self.progressBar.setRange(0, 0)
+                self.BLOQUEO()
+                self.hiloeliminar = Hiloeliminar(nombre, self.nombre_BD)
+                self.hiloeliminar.start()
+                self.tabla.removeRow(selected.row())
+                self.hiloeliminar.taskFinished.connect(self.Eliminado)
+                self.hiloeliminar.taskFinishedBarra.connect(self.STOPBARRA)
+            if buttonReply == QMessageBox.No:
+                print('No clicked.')
+        except:
+            self.ALERTA()
 
     def ExportarBase(self):
-        base = self.tabla.selectedItems()[0].text()
-        dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
-        print(dir)
-        self.thread = Hiloexportar(base,self.nombre_BD,dir)
-        self.thread.start()
-        self.thread.taskFinished.connect(self.Exportado)
+        try:
+            base = self.tabla.selectedItems()[0].text()
+            dir, _ = QtWidgets.QFileDialog.getSaveFileName(None, 'Guardar archivo', '', 'csv(*.csv)')
+            print(dir)
+            if dir:
+                self.progressBar.show()
+                self.progressBar.setRange(0, 0)
+                self.BLOQUEO()
+                self.thread = Hiloexportar(base,self.nombre_BD,dir)
+                self.thread.start()
+                self.thread.taskFinished.connect(self.Exportado)
+                self.thread.taskFinishedBarra.connect(self.STOPBARRA)
+            else:
+                print("CANCELADO")
+        except:
+            self.ALERTA()
 
     def Anadir(self):
+        dir = ""
         try:
-            dir = self.AbrirArchivo()
             base = self.tabla.selectedItems()[0].text()
             print(base)
-            self.hiloagrega = Hiloagregar(base, self.nombre_BD, dir)
-            self.hiloagrega.start()
-            self.hiloagrega.taskFinished.connect(self.Cargado)
-            self.hiloagrega.taskFinished.connect(self.CargarTabla)
+            dir, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Seleccionar archivo', '', 'csv(*.csv)')
+            if dir:
+                f = open(dir, 'rb')
+                print(dir)
+
+
+                self.progressBar.show()
+                self.progressBar.setRange(0, 0)
+                self.BLOQUEO()
+                self.hiloagrega = Hiloagregar(base, self.nombre_BD, dir)
+                self.hiloagrega.start()
+                self.hiloagrega.taskFinished.connect(self.Cargado)
+                self.hiloagrega.taskFinishedBarra.connect(self.STOPBARRA)
+                self.hiloagrega.taskFinished.connect(self.CargarTabla)
         except:
-            print("")
+            self.ALERTA()
+
+    def Home(self):
+        from Home import Main
+        self.ventana = Main()
+        self.ventana.show()
+        self.ventana.setWindowState(Qt.WindowNoState)
 
     def closeEvent(self, event):
-        close = QMessageBox.question(self,
-                                     "Salir",
-                                     "Estas seguro que quieres salir?",
+        close = QMessageBox.question(self, "Salir",
+                                     "Estas seguro que quieres salir de la Ayuda?",
                                      QMessageBox.Yes | QMessageBox.No)
         if close == QMessageBox.Yes:
-            event.accept()
+            print("cerro")
+            self.Home()
         else:
-            event.ignore()
+            print("")
 
     def alerta_tabla(self):
         msg = QMessageBox()
@@ -281,15 +398,34 @@ class Ui_MainBD(QMainWindow):
         msg.exec()
 
     def AYUDA(self):
-        self.ventana = Ui_MainBD()
-        self.ui = Ui_MainAyuda()
-        self.ui.setupUi(self.ventana)
-        self.ventana.show()
+        from Ayuda import Main_Ayuda
+        self.ayuda = Main_Ayuda()
+        self.ayuda.show()
+        self.hide()
+
+    def STOPBARRA(self):
+        self.progressBar.setRange(0,1)
+        self.progressBar.hide()
+
+        self.bt_recarga_bd.setEnabled(True)
+        self.bt_exportar_bd.setEnabled(True)
+        self.bt_agregar_bd.setEnabled(True)
+        self.bt_eliminar_bt.setEnabled(True)
+        self.bt_importar.setEnabled(True)
+
+    def BLOQUEO(self):
+        self.bt_recarga_bd.setEnabled(False)
+        self.bt_exportar_bd.setEnabled(False)
+        self.bt_agregar_bd.setEnabled(False)
+        self.bt_eliminar_bt.setEnabled(False)
+        self.bt_importar.setEnabled(False)
+
 
 
 
 class Hiloeliminar(QThread):
-
+    taskFinished = QtCore.pyqtSignal()
+    taskFinishedBarra = QtCore.pyqtSignal()
     def __init__(self,nombre_tabla,nombre_base):
         QThread.__init__(self)
         #self.selected = selected
@@ -306,8 +442,11 @@ class Hiloeliminar(QThread):
             print("listo 2")
             query = "vacuum"
             self.run_query(query,self.nombre_bd)
+            self.taskFinished.emit()
+            self.taskFinishedBarra.emit()
         except:
             print("")
+        print("ELIMINACION TERMINADA")
 
     def run_query(self, query,nombre_BD, parameters=()):
         with sqlite3.connect(nombre_BD) as conn:
@@ -318,6 +457,7 @@ class Hiloeliminar(QThread):
   
 class Hiloexportar(QThread):
     taskFinished = QtCore.pyqtSignal()
+    taskFinishedBarra = QtCore.pyqtSignal()
     def __init__(self,nombre_tabla,nombre_base,dir):
         QThread.__init__(self)
         self.base = nombre_tabla
@@ -337,6 +477,7 @@ class Hiloexportar(QThread):
                 csv_writer.writerows(cur.fetchall())
             sql.close()
             print("hilo terminado")
+            self.taskFinishedBarra.emit()
             self.taskFinished.emit()
 
         except:
@@ -344,6 +485,8 @@ class Hiloexportar(QThread):
 
 class Hilocargar(QThread):
     taskFinished = QtCore.pyqtSignal()
+    taskFinishedBarra = QtCore.pyqtSignal()
+
     def __init__(self, nombre_tabla, nombre_base, dir):
         QThread.__init__(self)
         self.base = nombre_tabla
@@ -357,13 +500,25 @@ class Hilocargar(QThread):
         print(self.nombre_BD)
         print(self.dir)
         print("================================================")
-        f = open(self.dir, 'r',errors='ignore')
-        next(f, None)
+        try:
+            f = open(self.dir, 'r',encoding="utf-8")
+            next(f, None)
+        except Exception:
+            f = open(self.dir, 'r', encoding="latin-1")
+            next(f, None)
+
         reader = csv.reader(f, delimiter=',')
-        self.CrearTabla(self.base,self.nombre_BD)
-        self.Insertar(reader,self.base,self.nombre_BD)
-        self.Insertar_Master(self.base,self.nombre_BD)
-        self.taskFinished.emit()
+
+        try:
+            self.Creado(self.base, self.nombre_BD)
+            self.taskFinishedAlerta.emit()
+        except Exception:
+            print("CREADO")
+            self.CrearTabla(self.base, self.nombre_BD)
+            self.Insertar(reader, self.base, self.nombre_BD)
+            self.Insertar_Master(self.base, self.nombre_BD)
+            self.taskFinished.emit()
+            self.taskFinishedBarra.emit()
 
     def CrearTabla(self,nombre_tabla,nombre_base):
         query = '''CREATE TABLE IF NOT EXISTS ''' + nombre_tabla + '''
@@ -473,12 +628,17 @@ class Hilocargar(QThread):
             parametros = (nombre_tabla,row[0],row[1], row[2])
             self.run_query(query, nombre_bd,parametros)
 
+    def Creado(self,nombre_tabla,nombre_bd):
+        query = 'SELECT min(created_at), max(created_at),count(*) from ' + nombre_tabla
+        print(query)
+        db_rows = self.run_query(query, nombre_bd)
+
     def Insertar(self,csv,tabla,nombre_base):
         sql = sqlite3.connect(nombre_base)
         cur = sql.cursor()
         for row in csv:
             cur.execute(
-                "INSERT INTO " + tabla +" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO " + tabla + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9],
                  row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19],
                  row[20], row[21], row[22], row[23], row[24], row[25], row[26], row[27], row[28], row[29],
@@ -506,6 +666,7 @@ class Hilocargar(QThread):
 
 class Hiloagregar(QThread):
     taskFinished = QtCore.pyqtSignal()
+    taskFinishedBarra = QtCore.pyqtSignal()
     def __init__(self, nombre_tabla, nombre_base, dir):
         QThread.__init__(self)
         self.base = nombre_tabla
@@ -519,9 +680,12 @@ class Hiloagregar(QThread):
         print(self.dir)
         print("================================================")
         try:
-            f = open(self.dir, 'r', errors='ignore')
-            # Omitimos la linea de encabezado
-            next(f, None)
+            try:
+                f = open(self.dir, 'r', encoding="utf-8")
+                next(f, None)
+            except Exception:
+                f = open(self.dir, 'r', encoding="latin-1")
+                next(f, None)
             reader = csv.reader(f, delimiter=',')
             #print(base)
             #print(dir)
@@ -529,6 +693,7 @@ class Hiloagregar(QThread):
             self.limpiarBase(self.base, self.nombre_BD)
             self.Insertar_Master(self.base, self.nombre_BD)
             self.taskFinished.emit()
+            self.taskFinishedBarra.emit()
         except:
             print("")
 
@@ -572,10 +737,19 @@ class Hiloagregar(QThread):
             conn.commit()
         return result
 
+
 if __name__ == "__main__":
+
     import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainBD = Ui_MainBD()
-    MainBD.setupUI()
-    MainBD.show()
+    app = QApplication(sys.argv)
+    app.setStyle('fusion')
+    palette = QtGui.QPalette()
+    fuente = QFont()
+
+    fuente.setPointSize(10)
+    fuente.setFamily("Bahnschrift Light")
+    app.setFont(fuente)
+
+    window = Main_DB()
+    window.show()
     sys.exit(app.exec_())

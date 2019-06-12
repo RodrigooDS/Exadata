@@ -8,3 +8,5 @@ Exadata es un sistema de informacion desarrollado en Python y MYSQLP que permite
 - Cortar Fecha
 - Popularidad
 - Nube De Palabras
+
+![](https://github.com/RodrigooDS/Exadata/blob/master/PROYECTO/LOGO.png)

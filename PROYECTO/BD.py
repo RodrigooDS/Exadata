@@ -232,7 +232,7 @@ class Main_DB(QMainWindow):
                     print('No clicked.')
 
 
-        except Exception:
+        except:
             print("NO EXISTE")
             if self.Comprobar_texto(nombre_tabla) == 0:
                 self.alerta_tabla()
@@ -419,8 +419,6 @@ class Main_DB(QMainWindow):
         self.bt_agregar_bd.setEnabled(False)
         self.bt_eliminar_bt.setEnabled(False)
         self.bt_importar.setEnabled(False)
-
-
 
 
 class Hiloeliminar(QThread):
@@ -745,11 +743,9 @@ if __name__ == "__main__":
     app.setStyle('fusion')
     palette = QtGui.QPalette()
     fuente = QFont()
-
     fuente.setPointSize(10)
     fuente.setFamily("Bahnschrift Light")
     app.setFont(fuente)
-
     window = Main_DB()
     window.show()
     sys.exit(app.exec_())

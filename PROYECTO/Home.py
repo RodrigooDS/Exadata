@@ -173,9 +173,10 @@ class Main(QMainWindow):
         self.hide()
 
     def NUBEPALABRAS(self):
-        self.ventana = Ui_MainNube()
-        self.ventana.setupUi(self.ventana)
+        from NubePalabras import Main_Nube
+        self.ventana = Main_Nube()
         self.ventana.show()
+        self.hide()
 
     def NUBEBIGRAMA(self):
         self.ventana = Ui_MainBigrama()

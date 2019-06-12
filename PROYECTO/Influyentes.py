@@ -167,7 +167,6 @@ class Main_Influyentes(QMainWindow):
         self.label_PUBLICACIONES.setGeometry(QtCore.QRect(550, 470, 190, 20))
         self.label_PUBLICACIONES.setObjectName("label_PUBLICACIONES")
 
-
         #TEXTO
         self.fechaInicio = QtWidgets.QDateEdit(self.centralwidget)
         self.fechaInicio.setGeometry(QtCore.QRect(550, 380, 120, 22))

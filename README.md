@@ -4,3 +4,7 @@ Exadata es un sistema de informacion desarrollado en Python y MYSQLP que permite
 
 # Modulos
 - Administracion de CSV
+- Muestra
+- Cortar Fecha
+- Popularidad
+- Nube De Palabras

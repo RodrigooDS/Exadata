@@ -9,4 +9,4 @@ Exadata es un sistema de informacion desarrollado en Python y MYSQL que permite 
 - Popularidad
 - Nube De Palabras
 
-![](https://github.com/RodrigooDS/Exadata/blob/master/PROYECTO/Logotipo.png)
+
